@@ -17,8 +17,8 @@ privately when private vulnerability reporting is available. If that option is
 unavailable, email [security@msx.no](mailto:security@msx.no).
 
 Use the same private routes to report accidentally exposed sensitive
-information, credentials or secrets, and weak or unsafe security controls or
-configurations.
+information, exposed credentials, exposed secrets, and weak or unsafe security
+controls or configurations.
 
 Include the affected repository and version or commit, the vulnerability and
 its impact, steps to reproduce it, and any proof of concept or suggested
