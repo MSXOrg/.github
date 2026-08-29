@@ -10,7 +10,8 @@ Include the repository and version, relevant environment details, expected and
 actual behavior, reproduction steps, and sanitized logs. Remove credentials,
 personal information, and other secrets before posting.
 
-Private support matters go to [support@msx.no](mailto:support@msx.no).
+Private support matters go to
+[support@msx.no](mailto:support@msx.no).
 
 ## Sensitive reports
 
