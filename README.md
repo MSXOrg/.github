@@ -16,9 +16,3 @@ See GitHub's guide to
 [default community health files](https://docs.github.com/en/communities/setting-up-your-project-for-healthy-contributions/creating-a-default-community-health-file)
 and the MSX
 [Organization Standard](https://msx.no/docs/Ways-of-Working/Organization-Standard/).
-
-## Licensing
-
-Repository content is licensed under the [MIT License](LICENSE), except
-[the code of conduct](.github/CODE_OF_CONDUCT.md), which retains the
-Contributor Covenant's CC BY-SA 4.0 license.
