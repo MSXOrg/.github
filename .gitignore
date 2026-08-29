@@ -1,0 +1,11 @@
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Editors
+.history/
+.idea/
+.vscode/
+*.code-workspace
+*.swp
+*~
