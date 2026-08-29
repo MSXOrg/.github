@@ -12,6 +12,12 @@ before this organization-wide fallback.
 - Read the repository's code of conduct and applicable MSX standards.
 - Keep each change focused on one deliverable.
 
+## Agent plugin
+
+The [MSX agent plugin marketplace](https://github.com/MSXOrg/docs/tree/main/.github/plugin)
+provides Copilot CLI with skills that route work to current MSX standards and
+workflows.
+
 ## Submit the change
 
 1. Create a short-lived branch from the repository's default branch.
