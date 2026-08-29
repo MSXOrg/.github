@@ -12,7 +12,9 @@ actual behavior, reproduction steps, and sanitized logs. Remove credentials,
 personal information, and other secrets before posting.
 
 For a matter that cannot be shared publicly, email
-[msx@msx.no](mailto:msx@msx.no).
+[support@msx.no](mailto:support@msx.no).
+
+For billing questions, email [billing@msx.no](mailto:billing@msx.no).
 
 ## Sensitive reports
 

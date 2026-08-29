@@ -14,7 +14,7 @@ pull request, discussion, or other public channel.
 
 Use the affected repository's **Security** tab to report the vulnerability
 privately when private vulnerability reporting is available. If that option is
-unavailable, email [msx@msx.no](mailto:msx@msx.no).
+unavailable, email [security@msx.no](mailto:security@msx.no).
 
 Use the same private routes to report accidentally exposed sensitive
 information, credentials or secrets, and security controls or configurations
