@@ -16,6 +16,10 @@ Use the affected repository's **Security** tab to report the vulnerability
 privately when private vulnerability reporting is available. If that option is
 unavailable, email [msx@msx.no](mailto:msx@msx.no).
 
+Use the same private routes to report accidentally exposed sensitive
+information, credentials or secrets, and security controls or configurations
+that appear weak or unsafe.
+
 Include the affected repository and version or commit, the vulnerability and
 its impact, steps to reproduce it, and any proof of concept or suggested
 mitigation. MSX handles reports privately, investigates them, and coordinates
