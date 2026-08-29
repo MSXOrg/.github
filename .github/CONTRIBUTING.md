@@ -1,8 +1,8 @@
 # Contributing
 
-Thank you for contributing to an MSX repository. Follow the affected
-repository's README and repository-local contribution guidance first; local
-files provide the project-specific build, test, and validation steps.
+The affected repository's README and repository-local contribution guidance
+define its build, test, and validation steps. Follow those local instructions
+before this organization-wide fallback.
 
 ## Before making a change
 

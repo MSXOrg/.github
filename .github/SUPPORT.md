@@ -4,17 +4,13 @@ For help with an MSX repository:
 
 1. Read that repository's README and documentation.
 2. Search its existing issues for a known answer.
-3. Open an issue in the affected repository if the question can be discussed
-   publicly.
+3. Open an issue in the affected repository for a public question.
 
 Include the repository and version, relevant environment details, expected and
 actual behavior, reproduction steps, and sanitized logs. Remove credentials,
 personal information, and other secrets before posting.
 
-For a matter that cannot be shared publicly, email
-[support@msx.no](mailto:support@msx.no).
-
-For billing questions, email [billing@msx.no](mailto:billing@msx.no).
+Private support matters go to [support@msx.no](mailto:support@msx.no).
 
 ## Sensitive reports
 
