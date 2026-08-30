@@ -1,4 +1,4 @@
-# Agent Instructions
+# AGENTS
 
 This repository is `github.com/MSXOrg/.github`. Read in this order:
 
