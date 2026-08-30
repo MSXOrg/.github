@@ -1,1 +1,1 @@
-# Make it **easy**, to move **fast**, in a **safe** way
+# Making it **easy**, to move **fast**, in a **safe** way
