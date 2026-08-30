@@ -21,43 +21,34 @@ body:
     validations:
       required: true
   - type: textarea
-    id: version
+    id: environment
     attributes:
-      label: Version information
+      label: Environment
       description: |
-        What version of the software were you running when encountering the
-        bug?
-        For modules, please provide the outputs of `$PSVersionTable` and
-        `Get-Module -ListAvailable -Name 'ModuleName'`.
-        For actions or workflows, please provide the version of the action or
-        workflow you were using.
+        What version, commit, platform, or configuration were you using when
+        the problem occurred?
     validations:
       required: true
   - type: textarea
     id: steps-to-reproduce
     attributes:
-      label: To reproduce
-      description: Steps to reproduce the problem.
-    validations:
-      required: true
-  - type: textarea
-    id: code-snippet
-    attributes:
-      label: Code snippet
+      label: Steps to reproduce
       description: >-
-        Add a code snippet to help us understand what you're trying to do.
-      render: powershell
+        List the steps, commands, inputs, or conditions that reproduce the
+        problem.
     validations:
       required: true
   - type: textarea
-    id: output
+    id: relevant-details
     attributes:
-      label: Relevant output
+      label: Relevant details
+      description: >-
+        Share any relevant code, configuration, logs, screenshots, links, or
+        other context.
+  - type: textarea
+    id: supporting-evidence
+    attributes:
+      label: Supporting evidence
       description: |
-        For powershell commands, run the command using `-Debug` and `-Verbose`
-        flags and paste the output here.
-        For actions or workflows, please provide the relevant output or a link
-        to the workflow run.
-      render: Shell
-    validations:
-      required: true
+        Include error messages, logs, screenshots, links, or other evidence
+        that helps explain the problem.
