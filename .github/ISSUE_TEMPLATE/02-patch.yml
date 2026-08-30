@@ -1,0 +1,21 @@
+---
+# GitHub issue form syntax.
+name: 🩹 [Patch]
+description: Submit a request to improve or change something that already exists
+title: '🩹 [Patch]: '
+labels: ['patch', 'triage']
+# GitHub issue form schema.
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this form! Please provide as much
+        information as possible so we can help you quickly.
+  - type: textarea
+    id: description
+    attributes:
+      label: Describe the change
+      description: >-
+        A clear and concise description of what you would want to change.
+    validations:
+      required: true

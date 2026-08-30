@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   fill="none"
+   viewBox="0 0 24 24"
+   height="24"
+   width="24"
+   id="Microsoft-Logo--Streamline-Logos-Block.svg"
+   version="1.1"
+   sodipodi:docname="logo-os-windows.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="48.875"
+     inkscape:cx="11.98977"
+     inkscape:cy="12"
+     inkscape:window-width="5120"
+     inkscape:window-height="1369"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="Microsoft-Logo--Streamline-Logos-Block.svg" />
+  <desc
+     id="desc1">Microsoft Logo Streamline Icon: https://streamlinehq.com</desc>
+  <path
+     fill="#646464"
+     fill-rule="evenodd"
+     d="M 4.3787491,0.01790281 A 4.3608463,4.3608463 0 0 0 0.01790281,4.3787491 V 19.641711 A 4.3608463,4.3608463 0 0 0 4.3787491,24.002558 H 19.641711 a 4.3608463,4.3608463 0 0 0 4.360847,-4.360847 V 4.3787491 A 4.3608463,4.3608463 0 0 0 19.641711,0.01790281 Z M 11.266705,3.8336433 H 3.8336433 v 7.4330617 h 7.4330617 z m 8.920112,0 h -7.433063 v 7.4330617 h 7.433063 z M 3.8336433,12.753754 h 7.4330617 v 7.433063 H 3.8336433 Z m 16.3531737,0 h -7.433063 v 7.433063 h 7.433063 z"
+     clip-rule="evenodd"
+     stroke-width="1.09021"
+     id="path1" />
+</svg>
