@@ -8,5 +8,3 @@ Read in this order:
 
 Clone each linked repository locally, keep its configuration local to that
 clone, and update it before reading it.
-
-Read nearest first. A local file never overrides a standard.
