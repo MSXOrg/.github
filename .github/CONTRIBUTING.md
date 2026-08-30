@@ -15,7 +15,7 @@ before this organization-wide fallback.
 ## Agent plugin
 
 The [MSX agent plugin marketplace](https://github.com/MSXOrg/docs/tree/main/.github/plugin)
-provides Copilot CLI with skills that route work to current MSX standards and
+provides harnesses with skills that route work to current MSX standards and
 workflows.
 
 ## Submit the change
