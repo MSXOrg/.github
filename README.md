@@ -5,5 +5,5 @@ community defaults. GitHub uses these files when an MSX repository does not
 define its own corresponding file. This repository must remain public for the
 fallback behavior to work.
 
-[MSXOrg/docs](https://github.com/MSXOrg/docs) is the source for MSX standards
-and ways of working.
+The central [MSX documentation](https://msx.no/docs/) is the source for MSX
+standards and ways of working.
