@@ -6,7 +6,7 @@ with the outcome and do not add a Summary heading.
 Follow the canonical [MSX PR Format](https://github.com/MSXOrg/docs/blob/main/src/docs/Ways-of-Working/PR-Format.md).
 -->
 
-<!-- ANNOUNCEMENT STOP -->
+<!-- SLACK MESSAGE STOP -->
 
 <!--
 Add only the classified sections that apply, in this order. Keep one coherent
