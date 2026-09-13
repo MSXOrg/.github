@@ -3,7 +3,10 @@ Write one or two concise paragraphs for the people who use what this repository
 delivers. State what changes, who is affected, and any required action. Start
 with the outcome and do not add a Summary heading.
 
-Follow the canonical [MSX PR Format](https://github.com/MSXOrg/docs/blob/main/src/docs/Ways-of-Working/PR-Format.md).
+Use one short reader-facing title. Omit icon, type, and Conventional Commit
+prefixes; issue references; unrelated lists; and AI or agent attribution.
+
+Follow the canonical [MSX PR Format](https://msxorg.github.io/docs/Ways-of-Working/PR-Format/).
 -->
 
 <!-- ANNOUNCEMENT STOP -->
@@ -41,11 +44,15 @@ blocks scoped to that section and in this order:
 
 Use fully qualified GitHub references. Use a closing keyword only when this
 change fully resolves the issue.
+
+For internal-only work with no classified section, place any supporting blocks
+directly after the announcement marker in the same order.
 -->
 
 <!--
-Only when this repository invokes release management for the target route, end
-the description with a horizontal rule and a collapsed Release decisions block,
-then apply the matching release:* labels. Repositories outside release
-management omit both the block and all release:* labels.
+Only when the target route invokes Release Management, end the description with
+a collapsed Release decisions block and apply the exact matching release:*
+labels. An optional .github/release.config.yml refines an invocation; its absence
+does not skip evaluation. Routes without an invocation omit the block and every
+release:* label, including release:skip.
 -->
