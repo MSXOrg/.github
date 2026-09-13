@@ -7,6 +7,8 @@ prefixes; issue references; unrelated lists; and AI or agent attribution.
 Replace every placeholder. Delete unused classifier groups, supporting blocks,
 examples, and release fields. Keep retained classifier groups in the order
 shown. Repeat a complete group when one classifier has several distinct results.
+Use fully qualified references and closing keywords only for issues the complete
+change resolves.
 
 For internal-only work with no classified result, delete all five classifier
 groups and place one applicable Technical details and Related references pair
