@@ -7,3 +7,6 @@ fallback behavior to work.
 
 The central [MSX documentation](https://msx.no/docs/) is the source for MSX
 standards and ways of working.
+
+Shared MSX images and editable artwork are available in the [media](media)
+folder.
