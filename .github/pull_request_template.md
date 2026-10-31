@@ -12,7 +12,8 @@ change resolves.
 
 For internal-only work with no classified result, delete all five classifier
 groups and place one applicable Technical details and Related references pair
-directly after the marker.
+directly after the marker. The summary carries the adoption or explicit no-action
+result; the supporting pair carries applicable evidence.
 
 Keep consumer instructions in the result prose and examples. Technical details
 and references support but do not replace them. Keep version-specific migration
@@ -37,17 +38,22 @@ default bump, not another level. Skip stands alone.
 
 Determine applicability from actual versioned release behavior, including native producer routes;
 a missing settings file alone does not mean that a route is unmanaged.
+Verify the immutable producer revision's settings and owned-label mapping before
+using canonical signals. If the released interface differs, require a verified adapter
+or producer/configuration migration with exact actions in that producer's
+PR/release record. Unsupported signals block finalization and required decision
+validation; do not apply ignored labels or treat the producer as unmanaged.
 Delete the complete Release decisions block when the target route does not
 invoke Release Management, and apply no release:* labels. For an invoked route
 with Release set to No, keep only Release and Labels with release:skip.
 
-Verified producer candidate: MSXOrg/docs#209 at 48533dcc70d8bc344f8192bfad8de25a8fdaabe9.
+Verified producer candidate: MSXOrg/docs#209 at 3d388e283c2e20d88d112b2951c4df857e955821.
 The complete body below matches that candidate; this correspondence does not
 claim that its draft has shipped.
 
-Follow the [complete MSX PR Format candidate](https://github.com/MSXOrg/docs/blob/48533dcc70d8bc344f8192bfad8de25a8fdaabe9/src/docs/Ways-of-Working/PR-Format.md#copy-the-complete-template).
-Resolve [settings and caller overrides](https://github.com/MSXOrg/docs/blob/48533dcc70d8bc344f8192bfad8de25a8fdaabe9/src/docs/Capabilities/release-management/design.md#settings-and-caller-overrides).
-Keep [release evidence](https://github.com/MSXOrg/docs/blob/48533dcc70d8bc344f8192bfad8de25a8fdaabe9/src/docs/Capabilities/release-management/spec.md#release-evidence) with its result.
+Follow the [complete MSX PR Format candidate](https://github.com/MSXOrg/docs/blob/3d388e283c2e20d88d112b2951c4df857e955821/src/docs/Ways-of-Working/PR-Format.md#copy-the-complete-template).
+Resolve [settings and caller overrides](https://github.com/MSXOrg/docs/blob/3d388e283c2e20d88d112b2951c4df857e955821/src/docs/Capabilities/release-management/design.md#settings-and-caller-overrides).
+Keep [release evidence](https://github.com/MSXOrg/docs/blob/3d388e283c2e20d88d112b2951c4df857e955821/src/docs/Capabilities/release-management/spec.md#release-evidence) with its result.
 -->
 
 {{ One or two short summary paragraphs that state what changes, why, who is
@@ -70,7 +76,9 @@ is sufficient. }}
 <details>
 <summary>Technical details</summary>
 
-{{ Implementation and validation evidence for this result. }}
+{{ Implementation and validation evidence, closing delivery-leaf plan progress,
+and issue-convergence search scope and outcome for this result, even when no
+additional issue converges. }}
 
 | Changed surface | Standards checked | Framework docs checked | Result |
 | --- | --- | --- | --- |
@@ -109,7 +117,9 @@ is sufficient. }}
 <details>
 <summary>Technical details</summary>
 
-{{ Implementation and validation evidence for this result. }}
+{{ Implementation and validation evidence, closing delivery-leaf plan progress,
+and issue-convergence search scope and outcome for this result, even when no
+additional issue converges. }}
 
 | Changed surface | Standards checked | Framework docs checked | Result |
 | --- | --- | --- | --- |
@@ -148,7 +158,9 @@ is sufficient. }}
 <details>
 <summary>Technical details</summary>
 
-{{ Implementation and validation evidence for this result. }}
+{{ Implementation and validation evidence, closing delivery-leaf plan progress,
+and issue-convergence search scope and outcome for this result, even when no
+additional issue converges. }}
 
 | Changed surface | Standards checked | Framework docs checked | Result |
 | --- | --- | --- | --- |
@@ -187,7 +199,9 @@ is sufficient. }}
 <details>
 <summary>Technical details</summary>
 
-{{ Implementation and validation evidence for this result. }}
+{{ Implementation and validation evidence, closing delivery-leaf plan progress,
+and issue-convergence search scope and outcome for this result, even when no
+additional issue converges. }}
 
 | Changed surface | Standards checked | Framework docs checked | Result |
 | --- | --- | --- | --- |
@@ -226,7 +240,9 @@ is sufficient. }}
 <details>
 <summary>Technical details</summary>
 
-{{ Implementation and validation evidence for this result. }}
+{{ Implementation and validation evidence, closing delivery-leaf plan progress,
+and issue-convergence search scope and outcome for this result, even when no
+additional issue converges. }}
 
 | Changed surface | Standards checked | Framework docs checked | Result |
 | --- | --- | --- | --- |
