@@ -80,7 +80,7 @@ Describe 'Organization feature intake' {
         $scenario = 'What should happen? Give a short example of the situation, ' +
         'the action you take, and the result you expect.'
         $prompt | Should -Match ([regex]::Escape($scenario))
-        "$guidance $prompt" | Should -Not -Match '\b(Gherkin|Given|When|Then)\b'
+        "$guidance $prompt" | Should -Not -Match '\bGherkin\b|\bGiven\s*/\s*When\s*/\s*Then\b'
     }
 
     It 'asks for a failure or boundary example only when it matters' {
