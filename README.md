@@ -13,6 +13,7 @@ folder.
 
 Pull request authors use the canonical
 [MSX PR Format](https://msx.no/docs/Ways-of-Working/PR-Format/) instructions.
-This repository does not distribute GitHub pull request templates or provide a
-central fallback. The format stays in canonical documentation, not repository
-template files.
+This repository provides no local or organization-fallback PR-template files,
+following the
+[Repository Standard's file policy](https://msx.no/docs/Ways-of-Working/Repository-Standard/#no-pr-template-files).
+The format stays in canonical documentation, not repository template files.
