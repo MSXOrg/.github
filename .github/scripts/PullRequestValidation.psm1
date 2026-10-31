@@ -169,7 +169,15 @@ function Get-ValidationInput {
     if (@($paths | Where-Object { $_ -match '[\x00-\x1f\x7f]' }).Count -gt 0) {
         throw 'Changed filenames containing control characters are unsupported; rename those files before validation.'
     }
+    if (@($paths | Where-Object { $_.Contains('\') }).Count -gt 0) {
+        throw 'Changed Git paths containing a literal backslash are unsupported; rename those files before validation.'
+    }
     $relevant = @($paths | Where-Object { $_ -match '\.(md|ps1|psm1|psd1|yml|yaml)$' })
+    # These directories are pruned by the pinned shared linter finder.
+    $prunedPath = '(^|/)(\.git|\.pytest_cache|\.rbenv|\.terragrunt-cache|\.venv|__pycache__|node_modules)/'
+    if (@($relevant | Where-Object { $_ -cmatch $prunedPath }).Count -gt 0) {
+        throw 'An applicable changed input is excluded by shared linter discovery; move it to a linted path before validation.'
+    }
     $templates = @($relevant | Where-Object {
             $_ -match '^(?:(?:\.github|docs)/)?(?:pull_request_template\.md|PULL_REQUEST_TEMPLATE/[^/]+\.md)$' -or
             $_ -eq '.github/tests/fixtures/pull_request_template.md'

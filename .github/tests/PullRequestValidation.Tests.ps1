@@ -54,6 +54,14 @@ BeforeDiscovery {
         @{ Location = '.github/tests/fixtures/pull_request_template.md' }
         @{ Location = '.github/validation.psd1' }
     )
+    $prunedDirectories = @(
+        @{ Directory = '.pytest_cache' }
+        @{ Directory = '.rbenv' }
+        @{ Directory = '.terragrunt-cache' }
+        @{ Directory = '.venv' }
+        @{ Directory = '__pycache__' }
+        @{ Directory = 'node_modules' }
+    )
 }
 
 BeforeAll {
@@ -171,6 +179,28 @@ Describe 'Actual committed validation inputs' {
         $result.LintFilter | Should -BeExactly '^(README\.md)$'
         'README.md' | Should -Match $result.LintFilter
         'docs/README.md' | Should -Not -Match $result.LintFilter
+    }
+
+    It 'rejects a literal backslash in a committed filename before path normalization' {
+        $blob = git -C $repositoryPath rev-parse HEAD:base.md
+        git -C $repositoryPath -c core.protectNTFS=false update-index --add --cacheinfo "100644,$blob,changed\file.md"
+        $path = Join-Path -Path $repositoryPath -ChildPath 'changed.md'
+        [IO.File]::WriteAllText($path, "# Changed`n")
+        git -C $repositoryPath add -- $path
+        git -C $repositoryPath commit --quiet -m 'Record a literal-backslash Git path'
+        { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision } |
+            Should -Throw -ExpectedMessage '*backslash*'
+    }
+
+    It 'rejects a selected file under linter-pruned directory <Directory>' -ForEach $prunedDirectories {
+        $directoryPath = Join-Path -Path $repositoryPath -ChildPath $Directory
+        $null = New-Item -ItemType Directory -Path $directoryPath
+        [IO.File]::WriteAllText((Join-Path -Path $directoryPath -ChildPath 'broken.md'), "# Broken!`n")
+        [IO.File]::WriteAllText((Join-Path -Path $repositoryPath -ChildPath 'changed.md'), "# Changed`n")
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Record a linter-pruned input and normal Markdown'
+        { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision } |
+            Should -Throw -ExpectedMessage '*linter discovery*'
     }
 
     It 'retains additions and deletions at lookup location <Location>' -ForEach $lookupLocations {

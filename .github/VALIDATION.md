@@ -74,6 +74,8 @@ is disabled in the input scan so removing a fallback cannot hide its old path.
 The linter strips its workspace prefix and uses an anchored repository-relative
 filter, so a changed `README.md` cannot select an unchanged `docs/README.md`.
 Filenames containing control characters are rejected before filter generation.
+Literal backslashes and relevant files under the pinned finder's pruned
+directories are rejected explicitly rather than counted as linted inputs.
 Committed symbolic-link inputs are rejected, including links materialized as
 regular files by a checkout. Single and named templates in the repository root,
 `docs`, and `.github` all receive structural checks, including removed paths.
