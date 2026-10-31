@@ -55,6 +55,7 @@ Deleted and surviving paths come from the committed diff with case-sensitive
 identity, so a case-only rename cannot hide its removed source path.
 The native test runner also fails if no discovered test passes, including
 skipped-only suites. Discovery counts do not substitute for executed regressions.
+The job-summary verdict and exit decision use the same success condition.
 
 Every selected Markdown file is read literally and sent on stdin to
 markdownlint-cli2 with the [unchanged shared rules][markdown].

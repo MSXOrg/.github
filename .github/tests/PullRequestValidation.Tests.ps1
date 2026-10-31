@@ -319,8 +319,19 @@ Describe 'Repository-native test runner defaults' {
             $testPath,
             "Describe 'Anonymous skipped suite' { It 'does not run' -Skip { throw 'must not run' } }"
         )
-        $output = pwsh -NoProfile -File $runner -RequiredVersion 6.1.0
-        $LASTEXITCODE | Should -Be 1
+        $summaryPath = Join-Path -Path $repository -ChildPath 'anonymous-summary.md'
+        $previousSummary = [Environment]::GetEnvironmentVariable('GITHUB_STEP_SUMMARY')
+        try {
+            [Environment]::SetEnvironmentVariable('GITHUB_STEP_SUMMARY', $summaryPath, 'Process')
+            $output = pwsh -NoProfile -File $runner -RequiredVersion 6.1.0
+            $actualExit = $LASTEXITCODE
+        } finally {
+            [Environment]::SetEnvironmentVariable('GITHUB_STEP_SUMMARY', $previousSummary, 'Process')
+        }
+        $actualExit | Should -Be 1
         ($output -join "`n") | Should -Match 'No test passed'
+        $summary = [IO.File]::ReadAllText($summaryPath)
+        $summary | Should -Match ('(?m)^## ' + [char] 0x274c + ' Pester')
+        $summary | Should -Not -Match ('(?m)^## ' + [char] 0x2705 + ' Pester')
     }
 }

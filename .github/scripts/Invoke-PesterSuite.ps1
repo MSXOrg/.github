@@ -99,6 +99,42 @@ function Write-WorkflowAnnotation {
     Write-Output "::${Type} title=${encodedTitle}::${encodedMessage}"
 }
 
+function Test-PesterResult {
+    <#
+        .SYNOPSIS
+        Decide whether a Pester run meets the test success gate.
+
+        .DESCRIPTION
+        Require passed tests, a completed passing result, and no failed containers.
+        Use this same decision for the summary verdict and process exit.
+
+        .EXAMPLE
+        Test-PesterResult -Result $result
+        Returns whether the run genuinely passed.
+
+        .INPUTS
+        None
+
+        You can't pipe objects to Test-PesterResult.
+
+        .OUTPUTS
+        System.Boolean
+
+        Whether the result satisfies the success gate.
+    #>
+    [OutputType([bool])]
+    [CmdletBinding()]
+    param(
+        # Actual result returned by Invoke-Pester.
+        [Parameter(Mandatory)]
+        [ValidateNotNull()]
+        [psobject] $Result
+    )
+
+    $Result.TotalCount -gt 0 -and $Result.PassedCount -gt 0 -and
+    $Result.Result -eq 'Passed' -and $Result.FailedContainersCount -eq 0
+}
+
 function Get-PesterSummaryMarkdown {
     <#
         .SYNOPSIS
@@ -126,7 +162,7 @@ function Get-PesterSummaryMarkdown {
         [Parameter(Mandatory)]
         [string] $SuiteRoot
     )
-    $verdict = if ($Result.Result -eq 'Passed') { '✅' } else { '❌' }
+    $verdict = if (Test-PesterResult -Result $Result) { '✅' } else { '❌' }
     $lines = [System.Collections.Generic.List[string]]::new()
     $lines.Add("## $verdict Pester — $($Result.PassedCount) passed, $($Result.FailedCount) failed, $($Result.SkippedCount) skipped")
     $lines.Add('')
@@ -215,7 +251,7 @@ if ($result.PassedCount -eq 0) {
     Write-WorkflowAnnotation -Type error -Title 'Test' -Message "No test passed in $($suite.Count) discovered suite(s); $($result.SkippedCount) were skipped."
     exit 1
 }
-if ($result.Result -eq 'Passed' -and $failedSuite -eq 0) {
+if (Test-PesterResult -Result $result) {
     Write-WorkflowAnnotation -Type notice -Title 'Test' -Message "$($result.PassedCount) test(s) passed in $($suite.Count) suite(s) ($($result.Duration.TotalSeconds.ToString('0.0'))s)."
     exit 0
 }
