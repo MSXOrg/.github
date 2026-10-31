@@ -1,137 +1,95 @@
 ---
-title: Validate organization-default pull requests
-description: Check changed files and source-bound fallback scaffolds locally.
+title: Validate community-default source changes
+description: Check committed source files without requiring a PR template.
 ---
 
-# Validate organization-default pull requests
+# Validate community-default source changes
 
-Run the same fixture and changed-input checks used by the read-only
-`Organization defaults validation` job.
-
-## Source and consumer scope
-
-This workflow and the commands below validate the special public
-`MSXOrg/.github` source repository and its organization fallback structure.
-The workflow, scripts, and fixtures are source-repository tooling, not
-community files that GitHub inherits into ordinary repositories.
-
-Ordinary repositories inherit the organization's community defaults.
-Keep local community files only when they contain repository-specific content;
-do not copy shared policy or contribution files to satisfy this validator.
-Consumers do not need to install this check. This work does not remove
-existing local files, perform deduplication, or roll validation out to consumers.
+`Organization defaults validation` checks pull requests to `main` in the
+special public `MSXOrg/.github` source repository.
 
 ## Before starting
 
-- Use PowerShell 7.4 or later, Git, and Node.js/npm.
-- For local code/configuration lint, also provide PSScriptAnalyzer, yamllint,
-  actionlint, and zizmor.
-- Fetch the intended base and commit the changes being checked. The diff command
-  examines commits, not staged or untracked files; validation rejects a dirty
-  working tree rather than certifying uncommitted corrections as HEAD.
-- Allow dependency restoration when needed: the source-native runner pins
-  Pester 6.1.0 and verifies its module GUID. Markdown examples pin
-  markdownlint-cli2 0.24.0.
+Use PowerShell 7.4+, Git, and Node.js/npm. Fetch the intended base and commit
+the changes being checked; the validator rejects staged, unstaged, or untracked
+differences rather than certifying working-tree corrections as the committed head.
+The existing runner restores pinned Pester 6.1.0 and verifies its module GUID.
+Markdown validation restores the existing markdownlint-cli2 tool at 0.24.0.
+
+PR descriptions follow the [canonical PR-format guidance][pr-format].
+PR templates are intentionally absent: this check neither requires nor copies,
+generates, or compares a template scaffold. Other community defaults retain
+their ordinary GitHub inheritance behavior. Consumer repositories do not install
+this workflow or copy policy/contribution files to satisfy it.
 
 ## Steps
 
-1. Fetch the base: `git fetch origin main`.
-2. Run the valid, malformed, and changed-input fixture suite:
+1. Fetch the intended base with `git fetch origin main`.
+2. Run the anonymous regression suites:
 
    ```powershell
    pwsh -NoProfile -File .github\scripts\Invoke-PesterSuite.ps1 -Path .github\tests -RequiredVersion 6.1.0
    ```
 
-3. Validate the committed inputs and any changed complete fallback:
+3. Validate the actual committed inputs, shared sources, and changed Markdown:
 
    ```powershell
    pwsh -NoProfile -File .github\scripts\Test-OrganizationDefaults.ps1 -BaseRevision origin/main
    ```
 
-4. Lint the actual changed Markdown with the shared configuration:
-
-   ```powershell
-   $ErrorActionPreference = 'Stop'
-   Import-Module -Name (Resolve-Path -LiteralPath '.github\scripts\PullRequestValidation.psm1').ProviderPath -Force
-   $inputs = Get-ValidationInput -RepositoryPath $PWD.ProviderPath -BaseRevision 'origin/main'
-   if ($inputs.MarkdownFiles.Count -eq 0) {
-       throw 'No changed Markdown: this command cannot report a Markdown pass.'
-   }
-   $npx = 'npx'
-   if ($IsWindows) {
-       $npx = 'npx.cmd'
-   }
-   $files = @($inputs.MarkdownFiles | ForEach-Object { ':' + $_ })
-   $markdownConfig = (Resolve-Path -LiteralPath '.github\linters\.markdown-lint.yml').ProviderPath
-   & $npx --yes -- markdownlint-cli2@0.24.0 --config $markdownConfig @files
-   if ($LASTEXITCODE -ne 0) {
-       throw 'Changed Markdown lint failed.'
-   }
-   ```
-
 ## Verify
 
-The fixture suite must discover tests, reject malformed scaffolds, and pass its
-valid cases. The changed-input report identifies the actual head and counts
-changed Markdown and production templates separately from its isolated fixture.
-Empty/unsupported-only diffs fail explicitly. Unchanged fallback content is not
-certified as the candidate. A changed missing or source-divergent fallback fails.
+The result names the actual head and merge base, existing changed files,
+Markdown files actually linted, checked deletions, and verified shared
+configuration sources. Empty or unsupported-only diffs fail. Intentional
+template deletion is checked as absence, not a missing-file error or a claim
+that deleted content was linted. Regression tests are reported separately and
+cannot disguise a scan that found no applicable input.
 
-The hosted job checks out the pull request head, compares its merge base, and
-passes an exact changed-file filter to the shared linter. Only Markdown,
-PowerShell, YAML, and workflow correctness/security checks are enabled. There
-is no path trigger filter, write token, publication, or label mutation.
-Per-language status writes and Super-Linter's pull request summary comments are
-explicitly disabled; the job itself supplies the named check. Rename detection
-is disabled in the input scan so removing a fallback cannot hide its old path.
-The linter strips its workspace prefix and uses an anchored repository-relative
-filter, so a changed `README.md` cannot select an unchanged `docs/README.md`.
-Filenames containing control characters are rejected before filter generation.
-Literal backslashes and relevant files under the pinned finder's pruned
-directories are rejected explicitly rather than counted as linted inputs.
-Committed symbolic-link inputs are rejected, including links materialized as
-regular files by a checkout. Single and named templates in the repository root,
-`docs`, and `.github` all receive structural checks, including removed paths.
+Every selected Markdown file is read literally and sent on stdin to
+markdownlint-cli2 with the [unchanged shared rules][markdown].
+An isolated temporary configuration sets `noInlineConfig: true`, so inline
+disable/configuration directives cannot turn malformed Markdown into a pass.
+Repository-local ignore/configuration files and glob-like filenames cannot
+skip an input. Directive examples remain valid Markdown; they are not new rules.
 
-The complete fixture and its LF-normalized SHA-256 in `validation.psd1` correspond
-to the [immutable complete scaffold][scaffold], including all five classifier
-groups, scoped supporting pairs, adoption/plan/convergence prompts, and conditional
-final decision fields. This source snapshot is not a shipped producer runtime or
-an installation dependency. The check validates template code, not filled-in PR
-descriptions or a producer's effective release decision.
+The [shared PowerShell][powershell], [Markdown][markdown], and [zizmor][zizmor]
+snapshots and [YAML baseline][yaml] are verified against the recorded immutable
+Git blobs in `validation.psd1`. They are tooling sources, not copied PR-format
+templates or producer-runtime dependencies. The [Pester runner][pester] comes
+from the same immutable shared tooling revision.
 
-The [shared Markdown configuration][markdown], [PowerShell configuration][powershell],
-and [Pester runner][pester] are vendored from an immutable default-branch revision,
-as is the [shared zizmor configuration][zizmor].
-The YAML configuration matches the [pinned shared linter baseline][yaml].
-Refresh a snapshot only against a selected immutable source, compare the complete
-source content independently, and rerun the valid/malformed suite.
+The workflow uses `pull_request` activities `opened`, `synchronize`, `reopened`,
+and `edited`, so retargeting a PR to `main` starts validation without a new head
+commit. It checks out and verifies that actual head. Only `contents: read` is
+granted; persisted credentials, per-language statuses, and PR-summary writes are
+disabled. Other language checks use the pinned shared linter's exact
+repository-relative filter. Control/backslash names, symbolic links, and
+relevant inputs in its pruned directories fail explicitly.
 
-For local code/configuration checks, use `Invoke-ScriptAnalyzer` with
-`.github\linters\.powershell-psscriptanalyzer.psd1`,
-`yamllint -c .github\linters\.yaml-lint.yml`, `actionlint`, and
-`zizmor --offline -c .github\linters\zizmor.yml`.
-Hosted checks use the pinned Super-Linter integration;
-local fixture results do not replace a completed result at the actual PR head.
+For deletion-only diffs there is no surviving content to lint. The report counts
+the checked deletions and configuration sources, and the other-language lint
+step does not run. This is not an empty input or a Markdown pass.
 
-GitHub-native Dependabot uses its [default three-day cooldown][cooldown].
-The shared zizmor configuration disables only the outdated missing-cooldown
-audit; all other workflow audits remain enabled. No cooldown override or
-label configuration is introduced.
+The exact hosted check is `Organization defaults validation`, produced by
+GitHub Actions. A completed result at the actual PR head is required evidence;
+local tests or a manually dispatched/skipped job cannot replace it.
+Making that check required for `main` is a separately approved governance action,
+not a rule or access change performed by this code.
 
 ## If it fails
 
 | Symptom | Cause | Resolution |
 | --- | --- | --- |
-| No applicable changed input | Empty diff or unsupported-only files | Confirm the intended committed base/head; do not count fixture-only evidence as a changed-input pass. |
-| Scaffold/source mismatch | Changed marker, groups, prompts, or decision structure | Restore the complete selected source scaffold and retain only comment-based authoring guidance before it. |
-| Head mismatch or missing merge base | Wrong checkout or incomplete history | Fetch the intended base/head and rerun at the actual PR head. |
-| Passing check does not hold merge | No required-check rule | Have the governance owner separately approve requiring `Organization defaults validation` from GitHub Actions for `main`. This code does not modify rulesets or access. |
+| No applicable changed input | Empty diff or unsupported-only files | Confirm the intended committed base/head; do not substitute regression-only evidence. |
+| Markdown lint failure | Shared-rule violation, even if an inline directive disables it | Correct the content; do not suppress or skip validation. |
+| Source mismatch | A shared configuration differs from its recorded source | Select and verify an immutable source refresh, then rerun the regressions. |
+| Head/working-tree mismatch | Wrong checkout, incomplete history, or uncommitted content | Fetch the intended base/head and commit the intended changes. |
+| Check does not hold merge | No required-check rule | Ask the governance owner to separately approve requiring the exact check/source. |
 
-[scaffold]: https://github.com/MSXOrg/docs/blob/1ececb2bd9f1680c87cec15a45ac927a554fce9c/src/docs/Ways-of-Working/PR-Format.md#copy-the-complete-template
+[pr-format]: https://msx.no/docs/Ways-of-Working/PR-Format/
 [markdown]: https://github.com/MSXOrg/docs/blob/36da9154aa55d2052345fb2f28b812b29daf8bc9/.github/linters/.markdown-lint.yml
 [powershell]: https://github.com/MSXOrg/docs/blob/36da9154aa55d2052345fb2f28b812b29daf8bc9/.github/linters/.powershell-psscriptanalyzer.psd1
-[pester]: https://github.com/MSXOrg/docs/blob/36da9154aa55d2052345fb2f28b812b29daf8bc9/.github/scripts/Invoke-PesterSuite.ps1
-[yaml]: https://github.com/super-linter/super-linter/blob/4ce20838b8ab83717e78138c5b3a1407148e0918/TEMPLATES/.yaml-lint.yml
 [zizmor]: https://github.com/MSXOrg/docs/blob/36da9154aa55d2052345fb2f28b812b29daf8bc9/.github/linters/zizmor.yaml
-[cooldown]: https://github.blog/changelog/2026-07-14-dependabot-version-updates-introduce-default-package-cooldown/
+[yaml]: https://github.com/super-linter/super-linter/blob/4ce20838b8ab83717e78138c5b3a1407148e0918/TEMPLATES/.yaml-lint.yml
+[pester]: https://github.com/MSXOrg/docs/blob/36da9154aa55d2052345fb2f28b812b29daf8bc9/.github/scripts/Invoke-PesterSuite.ps1
