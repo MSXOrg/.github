@@ -171,9 +171,26 @@ function Get-ValidationInput {
     }
     $relevant = @($paths | Where-Object { $_ -match '\.(md|ps1|psm1|psd1|yml|yaml)$' })
     $templates = @($relevant | Where-Object {
-            $_ -match '^\.github/(pull_request_template\.md|PULL_REQUEST_TEMPLATE/[^/]+\.md)$' -or
+            $_ -match '^(?:(?:\.github|docs)/)?(?:pull_request_template\.md|PULL_REQUEST_TEMPLATE/[^/]+\.md)$' -or
             $_ -eq '.github/tests/fixtures/pull_request_template.md'
         })
+    if ($relevant.Count -gt 0) {
+        $literalPaths = @($relevant | ForEach-Object { ':(literal)' + $_ })
+        $modes = git -C $repository ls-tree -r -z --format='%(objectmode)' $headCommit -- @literalPaths
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Cannot inspect committed validation input file types.'
+        }
+        if ((($modes -join "`n") -split "`0") -contains '120000') {
+            throw 'A committed validation input is a symbolic link; replace it with a regular file before validation.'
+        }
+    }
+    $status = git -C $repository status --porcelain=v1 --untracked-files=all -z
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Cannot verify the validation working tree.'
+    }
+    if (-not [string]::IsNullOrEmpty(($status -join "`n"))) {
+        throw 'The working tree differs from HEAD. Commit the intended changes before certifying that head.'
+    }
     $existing = @($relevant | Where-Object {
             Test-Path -LiteralPath (Join-Path -Path $repository -ChildPath $_) -PathType Leaf
         })

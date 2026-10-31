@@ -14,7 +14,8 @@ Run the same fixture and changed-input checks used by the read-only
 - For local code/configuration lint, also provide PSScriptAnalyzer, yamllint,
   actionlint, and zizmor.
 - Fetch the intended base and commit the changes being checked. The diff command
-  examines commits, not staged or untracked files.
+  examines commits, not staged or untracked files; validation rejects a dirty
+  working tree rather than certifying uncommitted corrections as HEAD.
 - Allow dependency restoration when needed: the source-native runner pins
   Pester 6.1.0 and verifies its module GUID. Markdown examples pin
   markdownlint-cli2 0.24.0.
@@ -73,6 +74,9 @@ is disabled in the input scan so removing a fallback cannot hide its old path.
 The linter strips its workspace prefix and uses an anchored repository-relative
 filter, so a changed `README.md` cannot select an unchanged `docs/README.md`.
 Filenames containing control characters are rejected before filter generation.
+Committed symbolic-link inputs are rejected, including links materialized as
+regular files by a checkout. Single and named templates in the repository root,
+`docs`, and `.github` all receive structural checks, including removed paths.
 
 The complete fixture and its LF-normalized SHA-256 in `validation.psd1` correspond
 to the [immutable complete scaffold][scaffold], including all five classifier

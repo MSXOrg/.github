@@ -42,6 +42,18 @@ BeforeDiscovery {
         @{ CaseName = 'a form feed'; FileName = "changed$([char] 12)file.md" }
         @{ CaseName = 'a delete control character'; FileName = "changed$([char] 127)file.md" }
     )
+    $lookupLocations = @(
+        @{ Location = 'pull_request_template.md' }
+        @{ Location = 'docs/pull_request_template.md' }
+        @{ Location = 'PULL_REQUEST_TEMPLATE/default.md' }
+        @{ Location = 'docs/PULL_REQUEST_TEMPLATE/default.md' }
+    )
+    $dirtyInputs = @(
+        @{ Location = 'changed.md' }
+        @{ Location = '.github/pull_request_template.md' }
+        @{ Location = '.github/tests/fixtures/pull_request_template.md' }
+        @{ Location = '.github/validation.psd1' }
+    )
 }
 
 BeforeAll {
@@ -159,6 +171,56 @@ Describe 'Actual committed validation inputs' {
         $result.LintFilter | Should -BeExactly '^(README\.md)$'
         'README.md' | Should -Match $result.LintFilter
         'docs/README.md' | Should -Not -Match $result.LintFilter
+    }
+
+    It 'retains additions and deletions at lookup location <Location>' -ForEach $lookupLocations {
+        $templatePath = Join-Path -Path $repositoryPath -ChildPath $Location
+        $null = New-Item -ItemType Directory -Path (Split-Path -Path $templatePath -Parent) -Force
+        [IO.File]::WriteAllText($templatePath, $valid)
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Add a supported lookup template'
+        $added = Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision
+        $added.TemplateFiles | Should -Contain $Location
+        $baseRevision = git -C $repositoryPath rev-parse HEAD
+        Remove-Item -LiteralPath $templatePath
+        [IO.File]::WriteAllText((Join-Path -Path $repositoryPath -ChildPath 'changed.md'), "# Changed`n")
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Remove a supported lookup template'
+        $removed = Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision
+        $removed.TemplateFiles | Should -Contain $Location
+    }
+
+    It 'rejects a committed symbolic-link input even when Git materializes a regular file' {
+        $path = Join-Path -Path $repositoryPath -ChildPath 'linked.md'
+        [IO.File]::WriteAllText($path, $valid)
+        $blob = git -C $repositoryPath hash-object -w $path
+        git -C $repositoryPath config core.symlinks false
+        git -C $repositoryPath update-index --add --cacheinfo "120000,$blob,linked.md"
+        git -C $repositoryPath commit --quiet -m 'Record a symbolic-link input'
+        { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision } |
+            Should -Throw -ExpectedMessage '*symbolic link*'
+    }
+
+    It 'rejects uncommitted content at <Location> instead of certifying HEAD' -ForEach $dirtyInputs {
+        $path = Join-Path -Path $repositoryPath -ChildPath $Location
+        $null = New-Item -ItemType Directory -Path (Split-Path -Path $path -Parent) -Force
+        [IO.File]::WriteAllText($path, $valid)
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Record committed validation input'
+        [IO.File]::WriteAllText($path, "# Uncommitted correction`n")
+        { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision } |
+            Should -Throw -ExpectedMessage '*working tree*'
+    }
+
+    It 'rejects staged content that differs from the reported HEAD' {
+        $path = Join-Path -Path $repositoryPath -ChildPath 'changed.md'
+        [IO.File]::WriteAllText($path, "# Committed`n")
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Record committed Markdown'
+        [IO.File]::WriteAllText($path, "# Staged correction`n")
+        git -C $repositoryPath add --all
+        { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision } |
+            Should -Throw -ExpectedMessage '*working tree*'
     }
 
     It 'retains a deleted fallback as an applicable structural error' {
