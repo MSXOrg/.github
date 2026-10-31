@@ -1,0 +1,141 @@
+#Requires -Version 7.4
+#Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '6.0.0'; MaximumVersion = '6.*' }
+
+[Diagnostics.CodeAnalysis.SuppressMessageAttribute(
+    'PSUseDeclaredVarsMoreThanAssignments', '',
+    Justification = 'Pester discovers and executes setup and test blocks in separate scopes.'
+)]
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = 'Stop'
+
+BeforeDiscovery {
+    $fixturePath = Join-Path -Path $PSScriptRoot -ChildPath 'fixtures\pull_request_template.md'
+    $fixture = [IO.File]::ReadAllText($fixturePath) -replace '\r\n?', "`n"
+    $marker = '<!-- ANNOUNCEMENT STOP -->'
+    $technical = [regex]::Match($fixture, '(?s)<details>\n<summary>Technical details</summary>.*?</details>').Value
+    $references = [regex]::Match($fixture, '(?s)<details>\n<summary>Related references</summary>.*?</details>').Value
+    $release = [regex]::Match($fixture, '(?s)<details>\n<summary>Release decisions</summary>.*?</details>').Value
+    $malformed = @(
+        @{ Name = 'missing announcement marker'; Content = $fixture.Replace($marker, ''); ExpectedError = '*announcement marker*' }
+        @{ Name = 'duplicate announcement marker'; Content = $fixture.Replace($marker, "$marker`n$marker"); ExpectedError = '*announcement marker*' }
+        @{ Name = 'fenced announcement marker'; Content = $fixture.Replace($marker, "``````markdown`n$marker`n``````"); ExpectedError = '*pinned source*' }
+        @{ Name = 'marker after a result'; Content = $fixture.Replace("$marker`n", '').Replace('## Removed:', "$marker`n## Removed:"); ExpectedError = '*pinned source*' }
+        @{ Name = 'missing classifier'; Content = $fixture.Replace('## Removed:', '## Other:'); ExpectedError = '*classifier*' }
+        @{ Name = 'unordered classifiers'; Content = $fixture.Replace('## Breaking:', '## Swap:').Replace('## New:', '## Breaking:').Replace('## Swap:', '## New:'); ExpectedError = '*classifier*' }
+        @{ Name = 'missing scoped evidence'; Content = $fixture.Replace($technical, ''); ExpectedError = '*scoped*' }
+        @{ Name = 'missing scoped references'; Content = $fixture.Replace($references, ''); ExpectedError = '*scoped*' }
+        @{ Name = 'references before evidence'; Content = $fixture.Replace("$technical`n`n$references", "$references`n`n$technical"); ExpectedError = '*scoped*' }
+        @{ Name = 'global evidence'; Content = $technical + "`n" + $fixture.Replace($technical, ''); ExpectedError = '*prefix*' }
+        @{ Name = 'missing final decision'; Content = $fixture.Replace($release, ''); ExpectedError = '*final release-decision*' }
+        @{ Name = 'decision before results'; Content = $fixture.Replace($release, '').Replace($marker, "$marker`n$release"); ExpectedError = '*final release-decision*' }
+        @{ Name = 'duplicate decision'; Content = $fixture + $release; ExpectedError = '*final release-decision*' }
+        @{ Name = 'missing resolved bump'; Content = $fixture.Replace('- **Version bump:**', '- **Other:**'); ExpectedError = '*release-decision fields*' }
+        @{ Name = 'missing conditional no-release guidance'; Content = $fixture.Replace("Delete this field when Release`n  is No.", ''); ExpectedError = '*pinned source*' }
+        @{ Name = 'missing adoption instructions'; Content = $fixture.Replace('adoption actions or an explicit no-action result.', 'See the diff for instructions.'); ExpectedError = '*pinned source*' }
+        @{ Name = 'unresolved source drift'; Content = $fixture.Replace('documented shared default', 'patch-only AutoPatching'); ExpectedError = '*pinned source*' }
+        @{ Name = 'non-comment prefix'; Content = "# Unrelated heading`n$fixture"; ExpectedError = '*prefix*' }
+    )
+}
+
+BeforeAll {
+    $modulePath = Join-Path -Path $PSScriptRoot -ChildPath '..\scripts\PullRequestValidation.psm1'
+    Import-Module -Name $modulePath -Force
+    $fixturePath = Join-Path -Path $PSScriptRoot -ChildPath 'fixtures\pull_request_template.md'
+    $valid = [IO.File]::ReadAllText($fixturePath) -replace '\r\n?', "`n"
+}
+
+Describe 'Pinned complete fallback scaffold' {
+    It 'accepts the independently recorded source fixture' {
+        $result = Test-PullRequestTemplate -Content $valid
+        $result.TemplateSha256 | Should -BeExactly '94fd209828f902b5faf4af9248826078843ea1ce37f168049606b53cfb6802c4'
+        $result.AnnouncementMarkers | Should -Be 1
+        $result.Classifiers | Should -Be 5
+        $result.ScopedDetails | Should -Be 5
+        $result.ReleaseDecisionBlocks | Should -Be 1
+    }
+
+    It 'accepts a comment-only authoring wrapper and CRLF line endings' {
+        $content = "<!-- Authoring guidance only. -->`n" + $valid
+        $result = Test-PullRequestTemplate -Content ($content -replace "`n", "`r`n")
+        $result.Classifiers | Should -Be 5
+    }
+
+    It 'rejects <Name>' -ForEach $malformed {
+        { Test-PullRequestTemplate -Content $Content } | Should -Throw -ExpectedMessage $ExpectedError
+    }
+
+    It 'rejects empty content rather than returning a pass' {
+        { Test-PullRequestTemplate -Content '' } | Should -Throw -ExpectedMessage '*empty*'
+    }
+
+    It 'does not identify the unchanged legacy fallback as the candidate' {
+        $legacy = "<!-- Lead with a concise outcome. -->`n---`n<details><summary>Technical details</summary></details>"
+        { Test-PullRequestTemplate -Content $legacy } | Should -Throw -ExpectedMessage '*announcement marker*'
+    }
+}
+
+Describe 'Actual committed validation inputs' {
+    BeforeEach {
+        $PSNativeCommandUseErrorActionPreference = $true
+        $repositoryPath = Join-Path -Path $TestDrive -ChildPath ([guid]::NewGuid().ToString())
+        $null = New-Item -ItemType Directory -Path $repositoryPath
+        git -C $repositoryPath init --quiet --initial-branch=main
+        git -C $repositoryPath config user.name 'Validation fixture'
+        git -C $repositoryPath config user.email 'fixture@example.invalid'
+        git -C $repositoryPath config core.autocrlf false
+        [IO.File]::WriteAllText((Join-Path -Path $repositoryPath -ChildPath 'base.md'), "# Base`n")
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Record anonymous base fixture'
+        $baseRevision = git -C $repositoryPath rev-parse HEAD
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Could not create the anonymous Git fixture.'
+        }
+    }
+
+    It 'rejects an empty diff instead of counting self-tests as changed inputs' {
+        { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision } |
+            Should -Throw -ExpectedMessage '*No applicable changed input*'
+    }
+
+    It 'rejects a media-only diff as no applicable input' {
+        [IO.File]::WriteAllText((Join-Path -Path $repositoryPath -ChildPath 'image.png'), 'anonymous fixture')
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Add anonymous non-Markdown input'
+        { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision } |
+            Should -Throw -ExpectedMessage '*No applicable changed input*'
+    }
+
+    It 'selects committed changed Markdown with spaces but not unchanged Markdown' {
+        [IO.File]::WriteAllText((Join-Path -Path $repositoryPath -ChildPath 'changed file.md'), "# Changed`n")
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Add changed Markdown input'
+        $result = Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision
+        $result.MarkdownFiles | Should -HaveCount 1
+        $result.MarkdownFiles[0] | Should -BeExactly 'changed file.md'
+        $result.TemplateFiles | Should -HaveCount 0
+    }
+
+    It 'retains a deleted fallback as an applicable structural error' {
+        $directory = Join-Path -Path $repositoryPath -ChildPath '.github'
+        $null = New-Item -ItemType Directory -Path $directory
+        $templatePath = Join-Path -Path $directory -ChildPath 'pull_request_template.md'
+        [IO.File]::WriteAllText($templatePath, $valid)
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Record the source-aligned fallback'
+        $baseRevision = git -C $repositoryPath rev-parse HEAD
+        Remove-Item -LiteralPath $templatePath
+        [IO.File]::WriteAllText((Join-Path -Path $repositoryPath -ChildPath 'changed.md'), "# Changed`n")
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Remove the fallback while changing Markdown'
+        $result = Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision
+        $result.TemplateFiles | Should -Contain '.github/pull_request_template.md'
+        $result.MarkdownFiles | Should -Not -Contain '.github/pull_request_template.md'
+    }
+
+    It 'fails explicitly for an invalid base revision' {
+        { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision 'missing-reference' } |
+            Should -Throw -ExpectedMessage '*base revision*'
+    }
+}
