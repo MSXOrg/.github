@@ -8,6 +8,19 @@ description: Check changed files and source-bound fallback scaffolds locally.
 Run the same fixture and changed-input checks used by the read-only
 `Organization defaults validation` job.
 
+## Source and consumer scope
+
+This workflow and the commands below validate the special public
+`MSXOrg/.github` source repository and its organization fallback structure.
+The workflow, scripts, and fixtures are source-repository tooling, not
+community files that GitHub inherits into ordinary repositories.
+
+Ordinary repositories inherit the organization's community defaults.
+Keep local community files only when they contain repository-specific content;
+do not copy shared policy or contribution files to satisfy this validator.
+Consumers do not need to install this check. This work does not remove
+existing local files, perform deduplication, or roll validation out to consumers.
+
 ## Before starting
 
 - Use PowerShell 7.4 or later, Git, and Node.js/npm.
