@@ -66,6 +66,9 @@ The hosted job checks out the pull request head, compares its merge base, and
 passes an exact changed-file filter to the shared linter. Only Markdown,
 PowerShell, YAML, and workflow correctness/security checks are enabled. There
 is no path trigger filter, write token, publication, or label mutation.
+Per-language status writes and Super-Linter's pull request summary comments are
+explicitly disabled; the job itself supplies the named check. Rename detection
+is disabled in the input scan so removing a fallback cannot hide its old path.
 
 The complete fixture and its LF-normalized SHA-256 in `validation.psd1` correspond
 to the [immutable complete scaffold][scaffold], including all five classifier

@@ -50,6 +50,7 @@ jobs:
         env:
           DEFAULT_BRANCH: main
           MULTI_STATUS: false
+          ENABLE_GITHUB_PULL_REQUEST_SUMMARY_COMMENT: false
           USE_FIND_ALGORITHM: true
           FILTER_REGEX_INCLUDE: ${{ steps.inputs.outputs.files_regex }}
           VALIDATE_MARKDOWN: true
