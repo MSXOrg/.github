@@ -1,6 +1,5 @@
 #Requires -Version 7.4
 #Requires -Modules @{ ModuleName = 'Pester'; ModuleVersion = '6.0.0'; MaximumVersion = '6.*' }
-#Requires -Modules @{ ModuleName = 'powershell-yaml'; ModuleVersion = '0.4.12' }
 
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
     'PSUseDeclaredVarsMoreThanAssignments', '',
@@ -13,65 +12,63 @@ $ErrorActionPreference = 'Stop'
 
 BeforeAll {
     $formPath = Join-Path -Path $PSScriptRoot -ChildPath '..\ISSUE_TEMPLATE\10-feature.yml'
-    $form = ConvertFrom-Yaml -Yaml ([IO.File]::ReadAllText($formPath))
-    $guidance = ($form.body[0].attributes.value -replace '\s+', ' ').Trim()
-    $prompt = ($form.body[1].attributes.description -replace '\s+', ' ').Trim()
+    $content = [IO.File]::ReadAllText($formPath) -replace '\r\n?', "`n"
+    $shape = @'
+\A---
+# GitHub issue form syntax and schema\.
+name: (?<Name>[^\n]+)
+description: (?<Description>[^\n]+)
+title: '(?<Title>[^'\n]+)'
+labels: \['feature', 'triage'\]
+body:
+  - type: markdown
+    attributes:
+      value: \|
+(?<Guidance>(?:        [^\n]*\n|\n)+)  - type: textarea
+    id: description
+    attributes:
+      label: (?<Label>[^\n]+)
+      description: \|
+(?<Prompt>(?:        [^\n]*\n)+)    validations:
+      required: true\n\z
+'@
+    $form = [regex]::Match($content, ($shape -replace '\r\n?', "`n"))
+    $introduction = $form.Groups['Guidance'].Value -replace '(?m)^ {8}', ''
+    $guidance = ($introduction -replace '\s+', ' ').Trim()
+    $prompt = ($form.Groups['Prompt'].Value -replace '\s+', ' ').Trim()
     $configurationPath = Join-Path -Path $PSScriptRoot -ChildPath '..\ISSUE_TEMPLATE\config.yml'
-    $configuration = ConvertFrom-Yaml -Yaml ([IO.File]::ReadAllText($configurationPath))
+    $configuration = [IO.File]::ReadAllText($configurationPath) -replace '\r\n?', "`n"
 }
 
 Describe 'Organization feature intake' {
     It 'preserves the feature identity and triage routing without assigning a native type' {
-        $form.name | Should -BeExactly "`u{1F680} [Feature]"
-        $form.description | Should -BeExactly 'Suggest/request a new feature'
-        $form.title | Should -BeExactly "`u{1F680}[Feature]: "
-        @($form.labels).Count | Should -Be 2
-        $form.labels[0] | Should -BeExactly 'feature'
-        $form.labels[1] | Should -BeExactly 'triage'
-        $form.ContainsKey('type') | Should -BeFalse
+        $form.Groups['Name'].Value | Should -BeExactly "`u{1F680} [Feature]"
+        $form.Groups['Description'].Value | Should -BeExactly 'Suggest/request a new feature'
+        $form.Groups['Title'].Value | Should -BeExactly "`u{1F680}[Feature]: "
+        $content | Should -Match "(?m)^labels: \['feature', 'triage'\]$"
+        $content | Should -Not -Match '(?m)^type:'
     }
 
-    It 'uses valid GitHub form keys and markdown and textarea attributes' {
-        ($form.Keys | Sort-Object) -join ',' | Should -BeExactly 'body,description,labels,name,title'
-        @($form.body).Count | Should -Be 2
-
-        $introduction = $form.body[0]
-        $introduction.type | Should -BeExactly 'markdown'
-        ($introduction.Keys | Sort-Object) -join ',' | Should -BeExactly 'attributes,type'
-        @($introduction.attributes.Keys) | Should -Be @('value')
-        $introduction.attributes.value | Should -BeOfType ([string])
-        $introduction.attributes.value | Should -Not -BeNullOrEmpty
-
-        $field = $form.body[1]
-        $field.type | Should -BeExactly 'textarea'
-        ($field.Keys | Sort-Object) -join ',' | Should -BeExactly 'attributes,id,type,validations'
-        $field.id | Should -Match '^[A-Za-z0-9_-]+$'
-        ($field.attributes.Keys | Sort-Object) -join ',' | Should -BeExactly 'description,label'
-        $field.attributes.label | Should -BeOfType ([string])
-        $field.attributes.label | Should -Not -BeNullOrEmpty
-        $field.attributes.description | Should -BeOfType ([string])
-        $field.attributes.description | Should -Not -BeNullOrEmpty
-        @($field.validations.Keys) | Should -Be @('required')
-        $field.validations.required | Should -BeOfType ([bool])
+    It 'retains the supported whole-form metadata and markdown and textarea structure' {
+        $form.Success | Should -BeTrue
+        $guidance | Should -Not -BeNullOrEmpty
+        $form.Groups['Label'].Value | Should -Not -BeNullOrEmpty
+        $prompt | Should -Not -BeNullOrEmpty
     }
 
     It 'requires only the existing free-text description field' {
-        $fields = @($form.body | Where-Object { $_.type -ne 'markdown' })
-        $fields.Count | Should -Be 1
-        $fields[0].id | Should -BeExactly 'description'
-        $fields[0].type | Should -BeExactly 'textarea'
-        $fields[0].validations.required | Should -BeTrue
-        $fields[0].attributes.ContainsKey('value') | Should -BeFalse
+        [regex]::Matches($content, '(?m)^  - type: (?!markdown$)').Count | Should -Be 1
+        $content | Should -Match '(?m)^    id: description$'
+        $content | Should -Match '(?m)^      required: true$'
+        $form.Success | Should -BeTrue
     }
 
     It 'keeps blank feedback intake available' {
-        @($configuration.Keys) | Should -Be @('blank_issues_enabled')
-        $configuration.blank_issues_enabled | Should -BeOfType ([bool])
-        $configuration.blank_issues_enabled | Should -BeTrue
+        $configuration | Should -BeExactly "blank_issues_enabled: true`n"
     }
 
     It 'asks for the consumer need and who benefits' {
-        $form.body[1].attributes.label | Should -BeExactly 'Describe the need'
+        $form.Groups['Label'].Value | Should -BeExactly 'Describe the need'
         $prompt | Should -Match ([regex]::Escape('What are you trying to do, and who would benefit?'))
     }
 
@@ -91,6 +88,12 @@ Describe 'Organization feature intake' {
         $guidance | Should -Match ([regex]::Escape('[issues]: https://msx.no/docs/Ways-of-Working/Issues/'))
         $planningLink = '[planning]: https://msx.no/docs/Ways-of-Working/Issues/Process/Planning/'
         $guidance | Should -Match ([regex]::Escape($planningLink))
+
+        $html = (ConvertFrom-Markdown -InputObject $introduction).Html
+        $links = [regex]::Matches($html, '<a href="([^"]+)"')
+        $links.Count | Should -Be 2
+        $links[0].Groups[1].Value | Should -BeExactly 'https://msx.no/docs/Ways-of-Working/Issues/'
+        $links[1].Groups[1].Value | Should -BeExactly 'https://msx.no/docs/Ways-of-Working/Issues/Process/Planning/'
     }
 
     It 'keeps external feedback separate from internal planning work' {
