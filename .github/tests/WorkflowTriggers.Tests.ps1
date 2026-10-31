@@ -49,4 +49,10 @@ Describe 'Pull request validation trigger coverage' {
         $workflow | Should -Match 'ref: \$\{\{ github.event.pull_request.head.sha \}\}'
         $workflow | Should -Not -Match 'pull_request_target|workflow_dispatch'
     }
+
+    It 'uses the released linter include-only contract after Markdown is checked separately' {
+        $workflow | Should -Not -Match '(?m)^          VALIDATE_[A-Z_]+: false$'
+        $workflow | Should -Match '(?m)^          VALIDATE_POWERSHELL: true$'
+        $workflow | Should -Match 'Test-OrganizationDefaults.ps1'
+    }
 }

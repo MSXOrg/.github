@@ -55,8 +55,7 @@ jobs:
           USE_FIND_ALGORITHM: true
           STRIP_DEFAULT_WORKSPACE_FOR_REGEX: true
           FILTER_REGEX_INCLUDE: ${{ steps.inputs.outputs.files_regex }}
-          # Markdown already used literal content and no inline overrides.
-          VALIDATE_MARKDOWN: false
+          # Only these routes are enabled; Markdown was checked by the controller.
           VALIDATE_POWERSHELL: true
           VALIDATE_YAML: true
           VALIDATE_GITHUB_ACTIONS: true
