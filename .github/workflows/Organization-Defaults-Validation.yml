@@ -48,7 +48,6 @@ jobs:
         # yamllint disable-line rule:line-length
         uses: super-linter/super-linter@4ce20838b8ab83717e78138c5b3a1407148e0918 # v8.7.0
         env:
-          DEFAULT_BRANCH: main
           MULTI_STATUS: false
           ENABLE_GITHUB_PULL_REQUEST_SUMMARY_COMMENT: false
           USE_FIND_ALGORITHM: true
