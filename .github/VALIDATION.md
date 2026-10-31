@@ -48,7 +48,8 @@ Run the same fixture and changed-input checks used by the read-only
        $npx = 'npx.cmd'
    }
    $files = @($inputs.MarkdownFiles | ForEach-Object { ':' + $_ })
-   & $npx --yes -- markdownlint-cli2@0.24.0 --config '.github\linters\.markdown-lint.yml' @files
+   $markdownConfig = (Resolve-Path -LiteralPath '.github\linters\.markdown-lint.yml').ProviderPath
+   & $npx --yes -- markdownlint-cli2@0.24.0 --config $markdownConfig @files
    if ($LASTEXITCODE -ne 0) {
        throw 'Changed Markdown lint failed.'
    }
@@ -69,6 +70,9 @@ is no path trigger filter, write token, publication, or label mutation.
 Per-language status writes and Super-Linter's pull request summary comments are
 explicitly disabled; the job itself supplies the named check. Rename detection
 is disabled in the input scan so removing a fallback cannot hide its old path.
+The linter strips its workspace prefix and uses an anchored repository-relative
+filter, so a changed `README.md` cannot select an unchanged `docs/README.md`.
+Filenames containing control characters are rejected before filter generation.
 
 The complete fixture and its LF-normalized SHA-256 in `validation.psd1` correspond
 to the [immutable complete scaffold][scaffold], including all five classifier

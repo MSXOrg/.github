@@ -166,8 +166,8 @@ function Get-ValidationInput {
         throw 'Cannot enumerate the actual changed inputs.'
     }
     $paths = @(($changed -join "`n") -split "`0" | Where-Object { $_ })
-    if (@($paths | Where-Object { $_ -match '[\r\n]' }).Count -gt 0) {
-        throw 'Changed filenames containing line breaks are unsupported; rename those files before validation.'
+    if (@($paths | Where-Object { $_ -match '[\x00-\x1f\x7f]' }).Count -gt 0) {
+        throw 'Changed filenames containing control characters are unsupported; rename those files before validation.'
     }
     $relevant = @($paths | Where-Object { $_ -match '\.(md|ps1|psm1|psd1|yml|yaml)$' })
     $templates = @($relevant | Where-Object {
@@ -181,6 +181,9 @@ function Get-ValidationInput {
         throw 'No applicable changed input was found. Fixture self-tests are not a complete pull request validation pass.'
     }
 
+    $escapedPaths = @($existing | ForEach-Object { [regex]::Escape($_) })
+    $filter = '^(' + ($escapedPaths -join '|') + ')$'
+
     [pscustomobject]@{
         HeadCommit = $headCommit
         MergeBase = $mergeBase
@@ -188,6 +191,7 @@ function Get-ValidationInput {
         ExistingFiles = $existing
         MarkdownFiles = @($existing | Where-Object { $_ -match '\.md$' })
         TemplateFiles = $templates
+        LintFilter = $filter
     }
 }
 

@@ -37,6 +37,11 @@ BeforeDiscovery {
         @{ Name = 'unresolved source drift'; Content = $fixture.Replace('documented shared default', 'patch-only AutoPatching'); ExpectedError = '*pinned source*' }
         @{ Name = 'non-comment prefix'; Content = "# Unrelated heading`n$fixture"; ExpectedError = '*prefix*' }
     )
+    $unsupportedFilenames = @(
+        @{ CaseName = 'a tab'; FileName = "changed`tfile.md" }
+        @{ CaseName = 'a form feed'; FileName = "changed$([char] 12)file.md" }
+        @{ CaseName = 'a delete control character'; FileName = "changed$([char] 127)file.md" }
+    )
 }
 
 BeforeAll {
@@ -94,6 +99,15 @@ Describe 'Actual committed validation inputs' {
         }
     }
 
+    Describe 'Native local Markdown configuration' {
+        It 'opens the provider-resolved configuration path with the native Node filesystem' {
+            $configPath = Join-Path -Path $PSScriptRoot -ChildPath '..\linters\.markdown-lint.yml'
+            $markdownConfig = (Resolve-Path -LiteralPath $configPath).ProviderPath
+            node -e 'require("node:fs").readFileSync(process.argv[1], "utf8")' $markdownConfig
+            $LASTEXITCODE | Should -Be 0
+        }
+    }
+
     It 'rejects an empty diff instead of counting self-tests as changed inputs' {
         { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision } |
             Should -Throw -ExpectedMessage '*No applicable changed input*'
@@ -115,6 +129,36 @@ Describe 'Actual committed validation inputs' {
         $result.MarkdownFiles | Should -HaveCount 1
         $result.MarkdownFiles[0] | Should -BeExactly 'changed file.md'
         $result.TemplateFiles | Should -HaveCount 0
+    }
+
+    It 'rejects a filename containing <CaseName> before selecting otherwise valid inputs' -ForEach $unsupportedFilenames {
+        $blob = git -C $repositoryPath rev-parse HEAD:base.md
+        # Index-only paths exercise Unix names without creating invalid Windows files.
+        git -C $repositoryPath -c core.protectNTFS=false update-index --add --cacheinfo "100644,$blob,$FileName"
+        $changedMarkdownPath = Join-Path -Path $repositoryPath -ChildPath 'changed.md'
+        [IO.File]::WriteAllText($changedMarkdownPath, "# Changed`n")
+        git -C $repositoryPath add -- $changedMarkdownPath
+        git -C $repositoryPath commit --quiet -m 'Record a control-character filename and valid Markdown'
+        { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision } |
+            Should -Throw -ExpectedMessage '*control characters*'
+    }
+
+    It 'produces an exact relative filter without selecting an unchanged suffix path' {
+        $directory = Join-Path -Path $repositoryPath -ChildPath 'docs'
+        $null = New-Item -ItemType Directory -Path $directory
+        $rootReadme = Join-Path -Path $repositoryPath -ChildPath 'README.md'
+        [IO.File]::WriteAllText($rootReadme, "# Root`n")
+        [IO.File]::WriteAllText((Join-Path -Path $directory -ChildPath 'README.md'), "# Nested`n")
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Record root and nested Markdown'
+        $baseRevision = git -C $repositoryPath rev-parse HEAD
+        [IO.File]::WriteAllText($rootReadme, "# Changed root`n")
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Change only the root Markdown'
+        $result = Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision
+        $result.LintFilter | Should -BeExactly '^(README\.md)$'
+        'README.md' | Should -Match $result.LintFilter
+        'docs/README.md' | Should -Not -Match $result.LintFilter
     }
 
     It 'retains a deleted fallback as an applicable structural error' {

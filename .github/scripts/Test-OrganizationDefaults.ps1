@@ -76,8 +76,7 @@ if ($inputs.MarkdownFiles.Count -eq 0) {
     Write-Information -MessageData 'No changed Markdown: only the applicable changed code/configuration is sent to its linters.' -InformationAction Continue
 }
 
-$escapedPaths = @($inputs.ExistingFiles | ForEach-Object { [regex]::Escape($_) })
-$filter = '(^|/)(' + ($escapedPaths -join '|') + ')$'
+$filter = $inputs.LintFilter
 if ($env:GITHUB_OUTPUT) {
     [IO.File]::AppendAllText($env:GITHUB_OUTPUT, "files_regex=$filter`n")
 }
