@@ -294,19 +294,33 @@ Describe 'Source controller accepts canonical-guidance-only inputs' {
 }
 
 Describe 'Repository-native test runner defaults' {
-    It 'discovers the source test directory without an explicit Path override' {
+    BeforeEach {
         $repository = Join-Path -Path $TestDrive -ChildPath 'runner-default'
         $scripts = Join-Path -Path $repository -ChildPath '.github\scripts'
         $tests = Join-Path -Path $repository -ChildPath '.github\tests'
         $null = New-Item -ItemType Directory -Path $scripts, $tests -Force
         $runner = Join-Path -Path $scripts -ChildPath 'Invoke-PesterSuite.ps1'
         Copy-Item -LiteralPath (Join-Path -Path $sourceRoot -ChildPath '.github\scripts\Invoke-PesterSuite.ps1') -Destination $runner
+        $testPath = Join-Path -Path $tests -ChildPath 'Anonymous.Tests.ps1'
+    }
+
+    It 'discovers the source test directory without an explicit Path override' {
         [IO.File]::WriteAllText(
-            (Join-Path -Path $tests -ChildPath 'Anonymous.Tests.ps1'),
+            $testPath,
             "Describe 'Anonymous source suite' { It 'runs one test' { 1 | Should -Be 1 } }"
         )
         $output = pwsh -NoProfile -File $runner -RequiredVersion 6.1.0
         $LASTEXITCODE | Should -Be 0
         ($output -join "`n") | Should -Match '1 test\(s\) passed'
+    }
+
+    It 'fails when discovered tests are all skipped and no regression executes' {
+        [IO.File]::WriteAllText(
+            $testPath,
+            "Describe 'Anonymous skipped suite' { It 'does not run' -Skip { throw 'must not run' } }"
+        )
+        $output = pwsh -NoProfile -File $runner -RequiredVersion 6.1.0
+        $LASTEXITCODE | Should -Be 1
+        ($output -join "`n") | Should -Match 'No test passed'
     }
 }

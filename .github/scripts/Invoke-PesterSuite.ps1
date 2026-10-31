@@ -12,9 +12,8 @@
     CI format, and a Markdown table on the job summary.
 
     The script exits 1 when a test fails, when a suite fails to run at all, or when
-    discovery finds no test file — a run that silently discovers nothing is green and
-    worthless, so it is treated as a failure. It exits 0 only when every discovered test
-    passed, which is what makes it usable as a merge gate.
+    discovery finds no test file, or no test passes (including skipped-only runs).
+    A run that silently executes nothing is not a pass.
 
     Pester is pinned to an exact version and verified by module GUID. A CI pipeline is an
     end artifact, so it pins to an exact resolved version for reproducibility rather than
@@ -210,6 +209,10 @@ if ($env:GITHUB_STEP_SUMMARY) {
 $failedSuite = $result.FailedContainersCount
 if ($result.TotalCount -eq 0) {
     Write-WorkflowAnnotation -Type error -Title 'Test' -Message "The $($suite.Count) discovered suite(s) contained no test — the run proved nothing."
+    exit 1
+}
+if ($result.PassedCount -eq 0) {
+    Write-WorkflowAnnotation -Type error -Title 'Test' -Message "No test passed in $($suite.Count) discovered suite(s); $($result.SkippedCount) were skipped."
     exit 1
 }
 if ($result.Result -eq 'Passed' -and $failedSuite -eq 0) {

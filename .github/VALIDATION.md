@@ -53,6 +53,8 @@ that deleted content was linted. Regression tests are reported separately and
 cannot disguise a scan that found no applicable input.
 Deleted and surviving paths come from the committed diff with case-sensitive
 identity, so a case-only rename cannot hide its removed source path.
+The native test runner also fails if no discovered test passes, including
+skipped-only suites. Discovery counts do not substitute for executed regressions.
 
 Every selected Markdown file is read literally and sent on stdin to
 markdownlint-cli2 with the [unchanged shared rules][markdown].
@@ -66,7 +68,8 @@ snapshots and [YAML baseline][yaml] are verified against the recorded immutable
 Git blobs in `validation.psd1`. They are tooling sources, not copied PR-format
 templates or producer-runtime dependencies. The [Pester runner][pester] comes
 from the same immutable shared tooling revision, with its local default adapted
-to `.github/tests` so invocation without `-Path` discovers this repository's suite.
+to `.github/tests` and a no-passed-test guard. Invocation without `-Path`
+discovers this repository's suite; skipped-only discovery cannot pass it.
 
 The workflow uses `pull_request` activities `opened`, `synchronize`, `reopened`,
 and `edited`, so retargeting a PR to `main` starts validation without a new head
