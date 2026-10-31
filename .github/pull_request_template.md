@@ -14,25 +14,58 @@ For internal-only work with no classified result, delete all five classifier
 groups and place one applicable Technical details and Related references pair
 directly after the marker.
 
+Keep consumer instructions in the result prose and examples. Technical details
+and references support but do not replace them. Keep version-specific migration
+instructions in the PR/release notes, not repository migration guides. Cover
+the complete delivered range from the identified consumer baseline, including
+bundled changes and required intermediate operations.
+
+The full body remains the release note. A future Discord sender takes only the
+pre-marker segment; announcement automation and date strategies are not
+implemented here. Keep exactly one marker after the leading summary.
+
+Shared defaults are overridden by repository settings in the optional
+.github/release.config.yml, then by explicitly supplied supported caller inputs.
+Omitted caller inputs preserve repository settings. DefaultBump replaces
+patch-only AutoPatching; it accepts patch, minor, or major, and its shared default is `patch`.
+One explicit bump label overrides a valid effective DefaultBump. Invalid settings
+and conflicting owned labels are errors, not reasons to select a fallback.
+
+Use only release:patch, release:minor, release:major, release:prerelease, and
+release:skip for release decisions. Prerelease is a mode using an explicit or
+default bump, not another level. Skip stands alone.
+
+Determine applicability from actual versioned release behavior, including native producer routes;
+a missing settings file alone does not mean that a route is unmanaged.
 Delete the complete Release decisions block when the target route does not
 invoke Release Management, and apply no release:* labels. For an invoked route
 with Release set to No, keep only Release and Labels with release:skip.
 
-Follow the canonical [MSX PR Format](https://msxorg.github.io/docs/Ways-of-Working/PR-Format/).
+Verified producer candidate: MSXOrg/docs#209 at 48533dcc70d8bc344f8192bfad8de25a8fdaabe9.
+The complete body below matches that candidate; this correspondence does not
+claim that its draft has shipped.
+
+Follow the [complete MSX PR Format candidate](https://github.com/MSXOrg/docs/blob/48533dcc70d8bc344f8192bfad8de25a8fdaabe9/src/docs/Ways-of-Working/PR-Format.md#copy-the-complete-template).
+Resolve [settings and caller overrides](https://github.com/MSXOrg/docs/blob/48533dcc70d8bc344f8192bfad8de25a8fdaabe9/src/docs/Capabilities/release-management/design.md#settings-and-caller-overrides).
+Keep [release evidence](https://github.com/MSXOrg/docs/blob/48533dcc70d8bc344f8192bfad8de25a8fdaabe9/src/docs/Capabilities/release-management/spec.md#release-evidence) with its result.
 -->
 
-{{ One or two short summary paragraphs that state what changes, who is affected,
-and any required action. }}
+{{ One or two short summary paragraphs that state what changes, why, who is
+affected, and required adoption actions or an explicit no-action result. }}
 
 <!-- ANNOUNCEMENT STOP -->
 
 ## Breaking: {{ Reader-facing result }}
 
-{{ One or two prose paragraphs that explain the outcome, affected readers, and
-required action. }}
+{{ Explain what changes, why, affected supported uses, compatibility, and exact
+adoption actions or an explicit no-action result. Include applicable
+prerequisites, verification, ordering, and any required intermediate installation
+or run. }}
 
-{{ Optional interface example or compact table after the prose. Delete when it
-does not help the reader act. }}
+{{ Interface or old-to-new example, comparison, or diagram after the prose when
+needed to make adoption unambiguous. Keep required transition details in this
+note; link to evergreen usage docs only for optional depth. Delete when prose
+is sufficient. }}
 
 <details>
 <summary>Technical details</summary>
@@ -43,10 +76,12 @@ does not help the reader act. }}
 | --- | --- | --- | --- |
 | `{{ Path or interface }}` | {{ Applicable standards }} | {{ Applicable framework docs, or `None (no framework-specific docs)` }} | {{ `Aligned`, `Fixed in this PR`, or `Exception - MSXOrg/repository#123` }} |
 
-{{ For an applicable release-managed consumer or template change, record the
-release and source baseline, exact consumer action and verification, and the
-compatible template repository and immutable commit. Delete when it does not
-apply. }}
+{{ For an applicable release-managed result, identify the consumer-change release
+and source baseline and evidence supporting the actions or no-action result
+above. For an affected integration template, identify its repository, verified
+compatible immutable commit, and compatibility evidence. Publication resolves
+actual release coordinates; do not predict a final version. Delete inapplicable
+evidence. }}
 
 </details>
 
@@ -61,11 +96,15 @@ apply. }}
 
 ## Removed: {{ Reader-facing result }}
 
-{{ One or two prose paragraphs that explain the outcome, affected readers, and
-required action. }}
+{{ Explain what changes, why, affected supported uses, compatibility, and exact
+adoption actions or an explicit no-action result. Include applicable
+prerequisites, verification, ordering, and any required intermediate installation
+or run. }}
 
-{{ Optional interface example or compact table after the prose. Delete when it
-does not help the reader act. }}
+{{ Interface or old-to-new example, comparison, or diagram after the prose when
+needed to make adoption unambiguous. Keep required transition details in this
+note; link to evergreen usage docs only for optional depth. Delete when prose
+is sufficient. }}
 
 <details>
 <summary>Technical details</summary>
@@ -76,10 +115,12 @@ does not help the reader act. }}
 | --- | --- | --- | --- |
 | `{{ Path or interface }}` | {{ Applicable standards }} | {{ Applicable framework docs, or `None (no framework-specific docs)` }} | {{ `Aligned`, `Fixed in this PR`, or `Exception - MSXOrg/repository#123` }} |
 
-{{ For an applicable release-managed consumer or template change, record the
-release and source baseline, exact consumer action and verification, and the
-compatible template repository and immutable commit. Delete when it does not
-apply. }}
+{{ For an applicable release-managed result, identify the consumer-change release
+and source baseline and evidence supporting the actions or no-action result
+above. For an affected integration template, identify its repository, verified
+compatible immutable commit, and compatibility evidence. Publication resolves
+actual release coordinates; do not predict a final version. Delete inapplicable
+evidence. }}
 
 </details>
 
@@ -94,11 +135,15 @@ apply. }}
 
 ## New: {{ Reader-facing result }}
 
-{{ One or two prose paragraphs that explain the outcome, affected readers, and
-required action. }}
+{{ Explain what changes, why, affected supported uses, compatibility, and exact
+adoption actions or an explicit no-action result. Include applicable
+prerequisites, verification, ordering, and any required intermediate installation
+or run. }}
 
-{{ Optional interface example or compact table after the prose. Delete when it
-does not help the reader act. }}
+{{ Interface or old-to-new example, comparison, or diagram after the prose when
+needed to make adoption unambiguous. Keep required transition details in this
+note; link to evergreen usage docs only for optional depth. Delete when prose
+is sufficient. }}
 
 <details>
 <summary>Technical details</summary>
@@ -109,10 +154,12 @@ does not help the reader act. }}
 | --- | --- | --- | --- |
 | `{{ Path or interface }}` | {{ Applicable standards }} | {{ Applicable framework docs, or `None (no framework-specific docs)` }} | {{ `Aligned`, `Fixed in this PR`, or `Exception - MSXOrg/repository#123` }} |
 
-{{ For an applicable release-managed consumer or template change, record the
-release and source baseline, exact consumer action and verification, and the
-compatible template repository and immutable commit. Delete when it does not
-apply. }}
+{{ For an applicable release-managed result, identify the consumer-change release
+and source baseline and evidence supporting the actions or no-action result
+above. For an affected integration template, identify its repository, verified
+compatible immutable commit, and compatibility evidence. Publication resolves
+actual release coordinates; do not predict a final version. Delete inapplicable
+evidence. }}
 
 </details>
 
@@ -127,11 +174,15 @@ apply. }}
 
 ## Changed: {{ Reader-facing result }}
 
-{{ One or two prose paragraphs that explain the outcome, affected readers, and
-required action. }}
+{{ Explain what changes, why, affected supported uses, compatibility, and exact
+adoption actions or an explicit no-action result. Include applicable
+prerequisites, verification, ordering, and any required intermediate installation
+or run. }}
 
-{{ Optional interface example or compact table after the prose. Delete when it
-does not help the reader act. }}
+{{ Interface or old-to-new example, comparison, or diagram after the prose when
+needed to make adoption unambiguous. Keep required transition details in this
+note; link to evergreen usage docs only for optional depth. Delete when prose
+is sufficient. }}
 
 <details>
 <summary>Technical details</summary>
@@ -142,10 +193,12 @@ does not help the reader act. }}
 | --- | --- | --- | --- |
 | `{{ Path or interface }}` | {{ Applicable standards }} | {{ Applicable framework docs, or `None (no framework-specific docs)` }} | {{ `Aligned`, `Fixed in this PR`, or `Exception - MSXOrg/repository#123` }} |
 
-{{ For an applicable release-managed consumer or template change, record the
-release and source baseline, exact consumer action and verification, and the
-compatible template repository and immutable commit. Delete when it does not
-apply. }}
+{{ For an applicable release-managed result, identify the consumer-change release
+and source baseline and evidence supporting the actions or no-action result
+above. For an affected integration template, identify its repository, verified
+compatible immutable commit, and compatibility evidence. Publication resolves
+actual release coordinates; do not predict a final version. Delete inapplicable
+evidence. }}
 
 </details>
 
@@ -160,11 +213,15 @@ apply. }}
 
 ## Fixed: {{ Reader-facing result }}
 
-{{ One or two prose paragraphs that explain the outcome, affected readers, and
-required action. }}
+{{ Explain what changes, why, affected supported uses, compatibility, and exact
+adoption actions or an explicit no-action result. Include applicable
+prerequisites, verification, ordering, and any required intermediate installation
+or run. }}
 
-{{ Optional interface example or compact table after the prose. Delete when it
-does not help the reader act. }}
+{{ Interface or old-to-new example, comparison, or diagram after the prose when
+needed to make adoption unambiguous. Keep required transition details in this
+note; link to evergreen usage docs only for optional depth. Delete when prose
+is sufficient. }}
 
 <details>
 <summary>Technical details</summary>
@@ -175,10 +232,12 @@ does not help the reader act. }}
 | --- | --- | --- | --- |
 | `{{ Path or interface }}` | {{ Applicable standards }} | {{ Applicable framework docs, or `None (no framework-specific docs)` }} | {{ `Aligned`, `Fixed in this PR`, or `Exception - MSXOrg/repository#123` }} |
 
-{{ For an applicable release-managed consumer or template change, record the
-release and source baseline, exact consumer action and verification, and the
-compatible template repository and immutable commit. Delete when it does not
-apply. }}
+{{ For an applicable release-managed result, identify the consumer-change release
+and source baseline and evidence supporting the actions or no-action result
+above. For an affected integration template, identify its repository, verified
+compatible immutable commit, and compatibility evidence. Publication resolves
+actual release coordinates; do not predict a final version. Delete inapplicable
+evidence. }}
 
 </details>
 
@@ -197,9 +256,12 @@ apply. }}
 - **Release:** {{ Yes or No }} - {{ Evidence from the artifact, route, and
   supported consumer contract. }}
 - **Version bump:** {{ Patch, Minor, or Major }} - {{ Compatibility evidence.
-  Delete this field when Release is No. }}
+  Identify the explicit label, supported caller input, repository setting, or
+  documented shared default that supplies it. Delete this field when Release
+  is No. }}
 - **Mode:** {{ Stable or Prerelease }} - {{ Target-route or override evidence.
-  Delete this field when Release is No. }}
+  Identify configured release-candidate routing when applicable. Delete this
+  field when Release is No. }}
 - **Labels:** {{ Exact `release:*` labels, or `None` when effective configuration
   supplies the decision without an override label. }}
 
