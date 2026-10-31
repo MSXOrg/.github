@@ -78,6 +78,24 @@ Describe 'Actual committed inputs without a PR template' {
         $result.MarkdownFiles | Should -HaveCount 0
     }
 
+    It 'distinguishes a deleted path from its case-only renamed replacement' {
+        $original = Join-Path -Path $repository -ChildPath 'Case.md'
+        $intermediate = Join-Path -Path $repository -ChildPath 'intermediate.md'
+        $replacement = Join-Path -Path $repository -ChildPath 'case.md'
+        [IO.File]::WriteAllText($original, "# Case`n")
+        git -C $repository add --all
+        git -C $repository commit --quiet -m 'Record original path casing'
+        $base = git -C $repository rev-parse HEAD
+        git -C $repository mv -- $original $intermediate
+        git -C $repository mv -- $intermediate $replacement
+        git -C $repository commit --quiet -m 'Record a case-only path rename'
+        $result = Get-ValidationInput -RepositoryPath $repository -BaseRevision $base
+        $result.DeletedFiles | Should -HaveCount 1
+        $result.DeletedFiles[0] | Should -BeExactly 'Case.md'
+        $result.ExistingFiles | Should -HaveCount 1
+        $result.ExistingFiles[0] | Should -BeExactly 'case.md'
+    }
+
     It 'does not call an empty diff a complete validation pass' {
         { Get-ValidationInput -RepositoryPath $repository -BaseRevision $base } |
             Should -Throw -ExpectedMessage '*No applicable changed input*'

@@ -236,16 +236,23 @@ function Get-ValidationInput {
     if (-not [string]::IsNullOrEmpty(($status -join "`n"))) {
         throw 'The working tree differs from HEAD. Commit the intended changes before certifying that head.'
     }
-    $existing = @($relevant | Where-Object {
-            Test-Path -LiteralPath (Join-Path -Path $repository -ChildPath $_) -PathType Leaf
-        })
+    $deletedChanges = git -C $repository diff --no-renames --name-only --diff-filter=D -z $mergeBase $headCommit --
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Cannot enumerate the committed deleted inputs.'
+    }
+    $deleted = @(($deletedChanges -join "`n") -split "`0" | Where-Object { $_ -cin $relevant })
+    $existing = @($relevant | Where-Object { $_ -cnotin $deleted })
+    foreach ($path in $existing) {
+        if (-not (Test-Path -LiteralPath (Join-Path -Path $repository -ChildPath $path) -PathType Leaf)) {
+            throw "Committed changed input '$path' has no regular file in the checkout."
+        }
+    }
     if (@($existing | Where-Object {
                 $_ -match '\.(ps1|psm1|psd1)$' -and
                 [System.Management.Automation.WildcardPattern]::ContainsWildcardCharacters($_)
             }).Count -gt 0) {
         throw 'A changed PowerShell path contains wildcard characters unsupported by the shared linter; rename it before validation.'
     }
-    $deleted = @($relevant | Where-Object { $_ -notin $existing })
     if ($relevant.Count -eq 0) {
         throw 'No applicable changed input was found. Fixture self-tests are not a complete pull request validation pass.'
     }

@@ -51,6 +51,8 @@ configuration sources. Empty or unsupported-only diffs fail. Intentional
 template deletion is checked as absence, not a missing-file error or a claim
 that deleted content was linted. Regression tests are reported separately and
 cannot disguise a scan that found no applicable input.
+Deleted and surviving paths come from the committed diff with case-sensitive
+identity, so a case-only rename cannot hide its removed source path.
 
 Every selected Markdown file is read literally and sent on stdin to
 markdownlint-cli2 with the [unchanged shared rules][markdown].
