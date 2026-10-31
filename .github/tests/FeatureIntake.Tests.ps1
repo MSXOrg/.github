@@ -83,17 +83,23 @@ Describe 'Organization feature intake' {
         "$guidance $prompt" | Should -Not -Match '\b(Gherkin|Given|When|Then)\b'
     }
 
-    It 'links the canonical issue and planning guidance instead of copying it' {
-        $guidance | Should -Match ([regex]::Escape('See [MSX issues][issues] and [issue planning][planning].'))
-        $guidance | Should -Match ([regex]::Escape('[issues]: https://msx.no/docs/Ways-of-Working/Issues/'))
+    It 'asks for a failure or boundary example only when it matters' {
+        $boundary = 'If a failure or limit changes what you expect, include that example too.'
+        $prompt | Should -Match ([regex]::Escape($boundary))
+    }
+
+    It 'links canonical planning and native routing instead of copying the guidance' {
+        $guidance | Should -Match ([regex]::Escape('See [issue planning][planning] and [issue routing][routing].'))
         $planningLink = '[planning]: https://msx.no/docs/Ways-of-Working/Issues/Process/Planning/'
         $guidance | Should -Match ([regex]::Escape($planningLink))
+        $routingLink = '[routing]: https://msx.no/docs/Ways-of-Working/Issues/Types/Hierarchy/'
+        $guidance | Should -Match ([regex]::Escape($routingLink))
 
         $html = (ConvertFrom-Markdown -InputObject $introduction).Html
         $links = [regex]::Matches($html, '<a href="([^"]+)"')
         $links.Count | Should -Be 2
-        $links[0].Groups[1].Value | Should -BeExactly 'https://msx.no/docs/Ways-of-Working/Issues/'
-        $links[1].Groups[1].Value | Should -BeExactly 'https://msx.no/docs/Ways-of-Working/Issues/Process/Planning/'
+        $links[0].Groups[1].Value | Should -BeExactly 'https://msx.no/docs/Ways-of-Working/Issues/Process/Planning/'
+        $links[1].Groups[1].Value | Should -BeExactly 'https://msx.no/docs/Ways-of-Working/Issues/Types/Hierarchy/'
     }
 
     It 'keeps external feedback separate from internal planning work' {
