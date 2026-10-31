@@ -1,0 +1,60 @@
+---
+name: Organization defaults validation
+
+'on':
+  pull_request:
+    branches:
+      - main
+
+permissions: { }
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validation:
+    name: Organization defaults validation
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - name: Check out the actual pull request head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate actual changed inputs and source correspondence
+        id: inputs
+        shell: pwsh
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: >-
+          ./.github/scripts/Test-OrganizationDefaults.ps1
+          -BaseRevision $env:BASE_SHA -ExpectedHead $env:PR_HEAD_SHA
+
+      - name: Test valid and malformed fallback fixtures
+        shell: pwsh
+        run: >-
+          ./.github/scripts/Invoke-PesterSuite.ps1
+          -Path ./.github/tests -RequiredVersion 6.1.0
+
+      - name: Lint the applicable changed files
+        # The complete identity pin and readable version exceed 80 columns.
+        # yamllint disable-line rule:line-length
+        uses: super-linter/super-linter@4ce20838b8ab83717e78138c5b3a1407148e0918 # v8.7.0
+        env:
+          DEFAULT_BRANCH: main
+          MULTI_STATUS: false
+          USE_FIND_ALGORITHM: true
+          FILTER_REGEX_INCLUDE: ${{ steps.inputs.outputs.files_regex }}
+          VALIDATE_MARKDOWN: true
+          VALIDATE_POWERSHELL: true
+          VALIDATE_YAML: true
+          VALIDATE_GITHUB_ACTIONS: true
+          VALIDATE_GITHUB_ACTIONS_ZIZMOR: true
+          GITHUB_ACTIONS_ZIZMOR_CONFIG_FILE: zizmor.yml
