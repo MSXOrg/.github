@@ -274,3 +274,21 @@ Describe 'Source controller accepts canonical-guidance-only inputs' {
         $LASTEXITCODE | Should -Be 0
     }
 }
+
+Describe 'Repository-native test runner defaults' {
+    It 'discovers the source test directory without an explicit Path override' {
+        $repository = Join-Path -Path $TestDrive -ChildPath 'runner-default'
+        $scripts = Join-Path -Path $repository -ChildPath '.github\scripts'
+        $tests = Join-Path -Path $repository -ChildPath '.github\tests'
+        $null = New-Item -ItemType Directory -Path $scripts, $tests -Force
+        $runner = Join-Path -Path $scripts -ChildPath 'Invoke-PesterSuite.ps1'
+        Copy-Item -LiteralPath (Join-Path -Path $sourceRoot -ChildPath '.github\scripts\Invoke-PesterSuite.ps1') -Destination $runner
+        [IO.File]::WriteAllText(
+            (Join-Path -Path $tests -ChildPath 'Anonymous.Tests.ps1'),
+            "Describe 'Anonymous source suite' { It 'runs one test' { 1 | Should -Be 1 } }"
+        )
+        $output = pwsh -NoProfile -File $runner -RequiredVersion 6.1.0
+        $LASTEXITCODE | Should -Be 0
+        ($output -join "`n") | Should -Match '1 test\(s\) passed'
+    }
+}

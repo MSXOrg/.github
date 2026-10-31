@@ -22,13 +22,19 @@ generates, or compares a template scaffold. Other community defaults retain
 their ordinary GitHub inheritance behavior. Consumer repositories do not install
 this workflow or copy policy/contribution files to satisfy it.
 
+The [Repository Standard][file-policy] owns the no-file policy, not PR Format.
+Template absence is not record-quality proof: review the actual title and full
+description against PR Format's boundary, ordered results, complete consumer
+actions, and supporting evidence. Release decisions apply only to actual
+release-managed routes. This file validator does not replace those record checks.
+
 ## Steps
 
 1. Fetch the intended base with `git fetch origin main`.
 2. Run the anonymous regression suites:
 
    ```powershell
-   pwsh -NoProfile -File .github\scripts\Invoke-PesterSuite.ps1 -Path .github\tests -RequiredVersion 6.1.0
+   pwsh -NoProfile -File .github\scripts\Invoke-PesterSuite.ps1 -RequiredVersion 6.1.0
    ```
 
 3. Validate the actual committed inputs, shared sources, and changed Markdown:
@@ -57,7 +63,8 @@ The [shared PowerShell][powershell], [Markdown][markdown], and [zizmor][zizmor]
 snapshots and [YAML baseline][yaml] are verified against the recorded immutable
 Git blobs in `validation.psd1`. They are tooling sources, not copied PR-format
 templates or producer-runtime dependencies. The [Pester runner][pester] comes
-from the same immutable shared tooling revision.
+from the same immutable shared tooling revision, with its local default adapted
+to `.github/tests` so invocation without `-Path` discovers this repository's suite.
 
 The workflow uses `pull_request` activities `opened`, `synchronize`, `reopened`,
 and `edited`, so retargeting a PR to `main` starts validation without a new head
@@ -90,6 +97,7 @@ not a rule or access change performed by this code.
 | Check does not hold merge | No required-check rule | Ask the governance owner to separately approve requiring the exact check/source. |
 
 [pr-format]: https://msx.no/docs/Ways-of-Working/PR-Format/
+[file-policy]: https://github.com/MSXOrg/docs/blob/bc03a5992615f65d1d5346dc48e7506e80b8b6ca/src/docs/Ways-of-Working/Repository-Standard.md#no-pr-template-files
 [markdown]: https://github.com/MSXOrg/docs/blob/36da9154aa55d2052345fb2f28b812b29daf8bc9/.github/linters/.markdown-lint.yml
 [powershell]: https://github.com/MSXOrg/docs/blob/36da9154aa55d2052345fb2f28b812b29daf8bc9/.github/linters/.powershell-psscriptanalyzer.psd1
 [zizmor]: https://github.com/MSXOrg/docs/blob/36da9154aa55d2052345fb2f28b812b29daf8bc9/.github/linters/zizmor.yaml

@@ -42,7 +42,7 @@ jobs:
         shell: pwsh
         run: >-
           ./.github/scripts/Invoke-PesterSuite.ps1
-          -Path ./.github/tests -RequiredVersion 6.1.0
+          -RequiredVersion 6.1.0
 
       - name: Lint the applicable changed files
         if: steps.inputs.outputs.existing_files != '0'

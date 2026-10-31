@@ -22,7 +22,7 @@
 
 .EXAMPLE
     ./Invoke-PesterSuite.ps1
-    Runs every suite under tests/ and exits non-zero if any test fails.
+    Runs every suite under .github/tests/ and exits non-zero if any test fails.
 
 .EXAMPLE
     ./Invoke-PesterSuite.ps1 -Path ./tests -RequiredVersion 6.0.1
@@ -46,7 +46,7 @@
 param(
     # Directory holding the Pester suites. Every '*.Tests.ps1' beneath it is run.
     [Parameter()]
-    [string] $Path = (Join-Path (Split-Path -Parent (Split-Path -Parent $PSScriptRoot)) 'tests'),
+    [string] $Path = (Join-Path (Split-Path -Parent $PSScriptRoot) 'tests'),
 
     # Exact Pester version to run with, so a new release cannot turn an untouched pull
     # request red. Keep it inside the range the suites' '#Requires' lines declare.
