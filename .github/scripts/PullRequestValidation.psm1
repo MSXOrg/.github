@@ -160,7 +160,8 @@ function Get-ValidationInput {
     if ($LASTEXITCODE -ne 0) {
         throw 'Cannot find the merge base. Fetch the complete base and head history.'
     }
-    $changed = git -C $repository diff --name-only --diff-filter=ACDMRT -z $mergeBase $headCommit --
+    # Retain the old path when a rename removes a GitHub template lookup file.
+    $changed = git -C $repository diff --no-renames --name-only --diff-filter=ACDMRT -z $mergeBase $headCommit --
     if ($LASTEXITCODE -ne 0) {
         throw 'Cannot enumerate the actual changed inputs.'
     }

@@ -134,6 +134,22 @@ Describe 'Actual committed validation inputs' {
         $result.MarkdownFiles | Should -Not -Contain '.github/pull_request_template.md'
     }
 
+    It 'retains the old path when a fallback is renamed outside template lookup' {
+        $directory = Join-Path -Path $repositoryPath -ChildPath '.github'
+        $null = New-Item -ItemType Directory -Path $directory
+        $templatePath = Join-Path -Path $directory -ChildPath 'pull_request_template.md'
+        [IO.File]::WriteAllText($templatePath, $valid)
+        git -C $repositoryPath add --all
+        git -C $repositoryPath commit --quiet -m 'Record the source-aligned fallback'
+        $baseRevision = git -C $repositoryPath rev-parse HEAD
+        $renamedPath = Join-Path -Path $directory -ChildPath 'renamed.md'
+        git -C $repositoryPath mv -- $templatePath $renamedPath
+        git -C $repositoryPath commit --quiet -m 'Move the fallback outside template lookup'
+        $result = Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision $baseRevision
+        $result.TemplateFiles | Should -Contain '.github/pull_request_template.md'
+        $result.MarkdownFiles | Should -Contain '.github/renamed.md'
+    }
+
     It 'fails explicitly for an invalid base revision' {
         { Get-ValidationInput -RepositoryPath $repositoryPath -BaseRevision 'missing-reference' } |
             Should -Throw -ExpectedMessage '*base revision*'
