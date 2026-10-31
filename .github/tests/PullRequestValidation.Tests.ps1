@@ -102,6 +102,20 @@ Describe 'Actual committed inputs without a PR template' {
         'changed o.md' | Should -Not -Match $result.LintFilter
     }
 
+    It 'rejects wildcard-bearing PowerShell input instead of linting an unchanged matching file' {
+        $unchanged = Join-Path -Path $repository -ChildPath 'changed o.ps1'
+        [IO.File]::WriteAllText($unchanged, "Write-Output 'anonymous fixture'`n")
+        git -C $repository add --all
+        git -C $repository commit --quiet -m 'Record unchanged ordinary PowerShell input'
+        $base = git -C $repository rev-parse HEAD
+        $changed = Join-Path -Path $repository -ChildPath 'changed [one].ps1'
+        [IO.File]::WriteAllText($changed, "Invoke-Expression -Command `"'anonymous fixture'`"`n")
+        git -C $repository add --all
+        git -C $repository commit --quiet -m 'Record a wildcard-bearing PowerShell filename'
+        { Get-ValidationInput -RepositoryPath $repository -BaseRevision $base } |
+            Should -Throw -ExpectedMessage '*PowerShell path contains wildcard characters*'
+    }
+
     It 'rejects a <Name> filename before path or filter normalization' -ForEach $unsupportedNames {
         $blob = git -C $repository rev-parse HEAD:base.md
         # Index-only Unix paths avoid creating invalid Windows files.

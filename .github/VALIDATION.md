@@ -66,6 +66,8 @@ granted; persisted credentials, per-language statuses, and PR-summary writes are
 disabled. Other language checks use the pinned shared linter's exact
 repository-relative filter. Control/backslash names, symbolic links, and
 relevant inputs in its pruned directories fail explicitly.
+Surviving PowerShell paths containing wildcard characters are also rejected:
+the shared analyzer's path option could otherwise inspect a different file.
 
 For deletion-only diffs there is no surviving content to lint. The report counts
 the checked deletions and configuration sources, and the other-language lint
