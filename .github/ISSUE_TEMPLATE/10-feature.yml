@@ -8,14 +8,14 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thank you for suggesting a feature. Tell us what you need and what
-        you expect to happen. You do not need to propose a technical solution
+        Describe what you need and the result you expect.
+        You do not need to propose a technical solution
         or use a special format.
 
         See [issue planning][planning] and [issue routing][routing].
 
-        This form collects feedback. Maintainers will link any internal
-        planning work separately.
+        This form collects feedback. Maintainers record internal plans
+        in separate issues linked to the feedback.
 
         [planning]: https://msx.no/docs/Ways-of-Working/Issues/Process/Planning/
         [routing]: https://msx.no/docs/Ways-of-Working/Issues/Types/Hierarchy/
@@ -24,10 +24,10 @@ body:
     attributes:
       label: Describe the need
       description: |
-        What are you trying to do, and who would benefit?
-        Why does this matter? Describe the problem or opportunity.
-        What should happen? Give a short example of the situation,
+        Describe what you need to do and who benefits.
+        Explain why this matters. Describe the problem or opportunity.
+        Describe the expected behavior. Give a short example of the situation,
         the action you take, and the result you expect.
-        If a failure or limit changes what you expect, include that example too.
+        If a failure or limit changes what you expect, include an example.
     validations:
       required: true

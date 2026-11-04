@@ -67,24 +67,29 @@ Describe 'Organization feature intake' {
         $configuration | Should -BeExactly "blank_issues_enabled: true`n"
     }
 
+    It 'starts with a direct request without thanks or a future promise' {
+        $guidance | Should -Match '^Describe what you need and the result you expect\. '
+        $guidance | Should -Not -Match '\b(thank(?:s|\s+you)|will)\b'
+    }
+
     It 'asks for the consumer need and who benefits' {
         $form.Groups['Label'].Value | Should -BeExactly 'Describe the need'
-        $prompt | Should -Match ([regex]::Escape('What are you trying to do, and who would benefit?'))
+        $prompt | Should -Match ([regex]::Escape('Describe what you need to do and who benefits.'))
     }
 
     It 'asks why the need matters' {
-        $prompt | Should -Match ([regex]::Escape('Why does this matter? Describe the problem or opportunity.'))
+        $prompt | Should -Match ([regex]::Escape('Explain why this matters. Describe the problem or opportunity.'))
     }
 
     It 'asks for a plain-language situation, action, and expected result' {
-        $scenario = 'What should happen? Give a short example of the situation, ' +
+        $scenario = 'Describe the expected behavior. Give a short example of the situation, ' +
         'the action you take, and the result you expect.'
         $prompt | Should -Match ([regex]::Escape($scenario))
         "$guidance $prompt" | Should -Not -Match '\bGherkin\b|\bGiven\s*/\s*When\s*/\s*Then\b'
     }
 
     It 'asks for a failure or boundary example only when it matters' {
-        $boundary = 'If a failure or limit changes what you expect, include that example too.'
+        $boundary = 'If a failure or limit changes what you expect, include an example.'
         $prompt | Should -Match ([regex]::Escape($boundary))
     }
 
@@ -103,7 +108,8 @@ Describe 'Organization feature intake' {
     }
 
     It 'keeps external feedback separate from internal planning work' {
-        $routing = 'This form collects feedback. Maintainers will link any internal planning work separately.'
+        $routing = 'This form collects feedback. Maintainers record internal plans ' +
+        'in separate issues linked to the feedback.'
         $guidance | Should -Match ([regex]::Escape($routing))
     }
 
