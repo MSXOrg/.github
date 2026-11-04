@@ -9,15 +9,14 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this bug report! Please provide
-        as much information as possible so we can help you quickly.
+        This form records the expected and actual behavior, environment, steps
+        to reproduce the problem, related information, and evidence.
   - type: textarea
     id: description
     attributes:
       label: Describe the bug
       description: >-
-        A clear and concise description of what the bug is vs. what you expected
-        to happen.
+        Give the expected behavior and the actual behavior.
     validations:
       required: true
   - type: textarea
@@ -25,8 +24,8 @@ body:
     attributes:
       label: Environment
       description: |
-        What version, commit, platform, or configuration were you using when
-        the problem occurred?
+        Give the version, commit, platform, or configuration in use when
+        the problem occurred.
     validations:
       required: true
   - type: textarea
@@ -34,7 +33,7 @@ body:
     attributes:
       label: Steps to reproduce
       description: >-
-        List the steps, commands, inputs, or conditions that reproduce the
+        Give the steps, commands, inputs, or conditions that reproduce the
         problem.
     validations:
       required: true
@@ -43,7 +42,7 @@ body:
     attributes:
       label: Relevant details
       description: >-
-        Share any relevant code, configuration, logs, screenshots, links, or
+        Include related code, configuration, logs, screenshots, links, or
         other context.
   - type: textarea
     id: supporting-evidence
@@ -51,4 +50,4 @@ body:
       label: Supporting evidence
       description: |
         Include error messages, logs, screenshots, links, or other evidence
-        that helps explain the problem.
+        of the problem.
