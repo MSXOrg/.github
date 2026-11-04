@@ -5,6 +5,10 @@ community defaults. GitHub uses these files when an MSX repository does not
 define its own corresponding file. This repository must remain public for the
 fallback behavior to work.
 
+This repository is for MSX repository maintainers and contributors.
+Maintainers use GitHub's community-file fallback to share organization guidance.
+Contributors use canonical MSX instructions to write pull request descriptions on GitHub.
+
 The central [MSX documentation](https://msx.no/docs/) is the source for MSX
 standards and ways of working.
 
