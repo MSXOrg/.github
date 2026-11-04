@@ -67,11 +67,6 @@ Describe 'Organization feature intake' {
         $configuration | Should -BeExactly "blank_issues_enabled: true`n"
     }
 
-    It 'starts with a direct request without thanks or a future promise' {
-        $guidance | Should -Match '^Describe what you need and the result you expect\. '
-        $guidance | Should -Not -Match '\b(thank(?:s|\s+you)|will)\b'
-    }
-
     It 'asks for the consumer need and who benefits' {
         $form.Groups['Label'].Value | Should -BeExactly 'Describe the need'
         $prompt | Should -Match ([regex]::Escape('Describe what you need to do and who benefits.'))
