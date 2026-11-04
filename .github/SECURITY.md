@@ -12,8 +12,8 @@ fallback.
 Do not disclose a suspected or confirmed vulnerability through a public issue,
 pull request, discussion, or other public channel.
 
-Use the affected repository's **Security** tab to report the vulnerability
-privately when private vulnerability reporting is available. If that option is
+When private vulnerability reporting is available, use the affected repository's
+**Security** tab to report the vulnerability privately. If that option is
 unavailable, email [security@msx.no](mailto:security@msx.no).
 
 Use the same private routes to report accidentally exposed sensitive
