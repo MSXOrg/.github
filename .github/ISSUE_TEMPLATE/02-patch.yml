@@ -9,13 +9,12 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this form! Please provide as much
-        information as possible so we can help you quickly.
+        This form records the change you want to existing content or behavior.
   - type: textarea
     id: description
     attributes:
       label: Describe the change
       description: >-
-        A clear and concise description of what you would want to change.
+        Give the existing content or behavior and the change you want.
     validations:
       required: true

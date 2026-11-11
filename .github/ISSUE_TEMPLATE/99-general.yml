@@ -9,12 +9,12 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this form! Please provide as much
-        information as possible so we can help you quickly.
+        This form records the subject and related information for an issue
+        that does not fit the other forms.
   - type: textarea
     id: description
     attributes:
       label: Description
-      description: A clear and concise description.
+      description: Give the subject of the issue and the related information.
     validations:
       required: true
