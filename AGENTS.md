@@ -2,5 +2,5 @@
 
 Read in this order:
 
-1. [README.md](README.md) — what this repository provides and how its defaults are enforced.
-2. [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) — how a change is made and reviewed.
+1. [README.md](README.md) — community defaults, MSX documentation, and shared media.
+2. [.github/CONTRIBUTING.md](.github/CONTRIBUTING.md) — the link to MSX contribution guidance.
